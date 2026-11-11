@@ -1,0 +1,15 @@
+{
+  "apiUrl": "http://localhost:5000/api/v1",
+  "supabase": {
+    "url": "https://rutowgkwewybymkimnkd.supabase.co",
+    "anonKey": "sb_anon_placeholder_key"
+  },
+  "featureFlags": {
+    "enablePaymentReview": false,
+    "enableSettings": false,
+    "enableCsvExport": true,
+    "enableInPersonRegistration": true,
+    "enableRealtimeSync": true,
+    "enablePublicExplore": false
+  }
+}
