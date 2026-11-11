@@ -3,7 +3,7 @@ import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import angular from 'angular-eslint';
 
-const FEATURES = ['public', 'participant', 'auth', 'organizer', 'admin'];
+const FEATURES = ['public', 'participant', 'auth', 'organizer', 'admin', 'dev'];
 
 const featureBoundaryConfigs = FEATURES.map((feature) => {
   const otherFeatures = FEATURES.filter((f) => f !== feature);

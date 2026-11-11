@@ -1,2 +1,2 @@
 // Theme switching service (TS-011)
-export {};
+export * from './theme.service';

@@ -56,6 +56,18 @@ src/app/
 
 > **Architecture boundary rule:** Features under `src/app/features/*` cannot import from one another. Shared code must live in `src/app/shared/` or `src/app/core/`.
 
+## Design System (Salar Cristal)
+
+The visual system is specified in `Docs/design/design-system.md` (ADR-0008) and implemented in `src/styles.css`:
+
+- **Tokens:** CSS variables `--ew-*` for light mode (`:root`) and dark mode (`.dark`), mapped to Tailwind with `@theme inline`. Use `bg-surface`, `text-muted`, `border-control`, `bg-pending-bg text-pending`, etc. Tailwind's default palette is disabled, so only Salar Cristal colours exist.
+- **Type scale:** `text-meta`, `text-secondary`, `text-body`, `text-subtitle`, `text-title`, `text-event-title`, `text-display` (Outfit 400 / 600 / 700).
+- **Corners:** `rounded-sm` (6 px), `rounded-md` (12 px), `rounded-lg` (18 px), `rounded-pill`.
+- **Glass:** `glass` (panels, bars, controls) and `glass-overlay` (modals, drawers). They become solid with "reduce transparency" or without `backdrop-filter` support.
+- **Theme:** `ThemeService` (`core/theme`) handles light / dark / system and stores the choice in `localStorage` (`ew-theme`). An inline script in `index.html` applies it before first paint.
+
+In development, open `http://localhost:4200/dev/tokens` to check every token, glass level and the worst-case contrast in both themes. The page does not exist in production builds.
+
 ## Linting & Testing
 
 ```bash
