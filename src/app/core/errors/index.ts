@@ -1,2 +1,2 @@
-// Error code catalog and global error handling (TS-014)
-export {};
+export * from './error-catalog';
+export * from './problem-details.model';
