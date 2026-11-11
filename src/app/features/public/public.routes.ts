@@ -75,6 +75,18 @@ export class TermsPage {}
 export class PrivacyPage {}
 
 @Component({
+  selector: 'app-forbidden-page',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <main class="p-6">
+      <h1 i18n="@@public.forbidden.title" class="text-2xl font-bold">Acceso no autorizado</h1>
+      <p class="mt-2 text-muted">No tienes permisos para acceder a este recurso.</p>
+    </main>
+  `,
+})
+export class ForbiddenPage {}
+
+@Component({
   selector: 'app-not-found-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -90,6 +102,10 @@ export const PUBLIC_ROUTES: Routes = [
     path: '',
     pathMatch: 'full',
     component: ExploreEventsPage,
+  },
+  {
+    path: '403',
+    component: ForbiddenPage,
   },
   {
     path: 'e/:slug',
