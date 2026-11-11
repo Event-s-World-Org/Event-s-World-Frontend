@@ -1,0 +1,18 @@
+<header class="flex items-center justify-between gap-4 border-b border-glass-border px-4 py-3">
+  <h2 [id]="titleId()" class="text-subtitle font-semibold">{{ title() }}</h2>
+  <button
+    app-button
+    variant="ghost"
+    square
+    type="button"
+    class="text-muted"
+    aria-label="Cerrar"
+    i18n-aria-label="@@dialog.close"
+    (click)="dialogRef.close()"
+  >
+    <svg lucideX aria-hidden="true"></svg>
+  </button>
+</header>
+<div class="flex-1 overflow-y-auto p-4">
+  <ng-content />
+</div>

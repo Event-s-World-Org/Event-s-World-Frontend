@@ -1,0 +1,288 @@
+<main class="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8">
+  <header class="flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <h1 class="text-title font-bold">Componentes shared/ui</h1>
+      <p class="text-secondary text-muted">Página de desarrollo · design-system.md §9</p>
+    </div>
+    <app-filter-chips
+      label="Tema"
+      [options]="themeOptions"
+      [value]="theme.preference()"
+      (valueChange)="setTheme($event)"
+    />
+  </header>
+
+  <section class="glass flex flex-col gap-4 rounded-lg p-6" aria-labelledby="buttons-title">
+    <h2 id="buttons-title" class="text-subtitle font-semibold">Botones</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <button app-button variant="primary" type="button">Guardar evento</button>
+      <button app-button type="button">Ver detalle</button>
+      <button app-button variant="ghost" type="button">Cancelar</button>
+      <button app-button variant="approve" type="button">Aprobar</button>
+      <button app-button variant="observe" type="button">Observar</button>
+      <button app-button variant="reject" type="button">Rechazar</button>
+    </div>
+    <div class="flex flex-wrap items-center gap-3">
+      <button app-button variant="primary" size="sm" type="button">Pequeño</button>
+      <button app-button variant="primary" type="button" loading>Guardando</button>
+      <button app-button variant="primary" type="button" disabled>Deshabilitado</button>
+      <button app-button variant="primary" square type="button" aria-label="Crear evento">
+        <svg lucidePlus aria-hidden="true"></svg>
+      </button>
+      <button app-button square size="sm" type="button" aria-label="Quitar filtro">
+        <svg lucideX aria-hidden="true"></svg>
+      </button>
+    </div>
+  </section>
+
+  <section class="glass flex flex-col gap-4 rounded-lg p-6" aria-labelledby="display-title">
+    <h2 id="display-title" class="text-subtitle font-semibold">Estados, chips y avatar</h2>
+    <div class="flex flex-wrap gap-2">
+      @for (status of statuses; track status) {
+        <app-status-badge [status]="status" />
+      }
+    </div>
+    <app-filter-chips label="Estado de pago" [options]="chipOptions" [(value)]="chipValue" />
+    <p class="text-meta text-muted">Filtro seleccionado: {{ chipValue() ?? 'ninguno' }}</p>
+    <div class="flex items-center gap-3">
+      <app-avatar name="Shirley Soto" />
+      <app-avatar name="Ana Quispe" size="sm" />
+    </div>
+  </section>
+
+  <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Tarjetas KPI">
+    <app-kpi-card label="Inscritos" value="86" hint="de 120 cupos">
+      <app-progress-bar class="mt-2" label="Cupos ocupados" [value]="86" [max]="120" />
+    </app-kpi-card>
+    <app-kpi-card label="Comprobantes por revisar" value="12" />
+    <app-kpi-card label="Dinero real" value="Bs 9.840,00" hint="Pagos aprobados" />
+    <app-kpi-card label="Dinero estimado" value="Bs 10.320,00" />
+  </section>
+
+  <section class="glass flex flex-col gap-4 rounded-lg p-6" aria-labelledby="loading-title">
+    <h2 id="loading-title" class="text-subtitle font-semibold">Carga y estado vacío</h2>
+    <div class="flex flex-col gap-2" aria-hidden="true">
+      <app-skeleton class="h-5 w-48" />
+      <app-skeleton class="h-4 w-72 max-w-full" />
+      <app-skeleton class="h-4 w-56" />
+    </div>
+    <app-empty-state
+      title="Aún no tienes eventos"
+      description="Crea tu primer evento para empezar a recibir inscripciones."
+    >
+      <button app-button variant="primary" type="button">Crear evento</button>
+    </app-empty-state>
+  </section>
+
+  <section class="glass flex flex-col gap-4 rounded-lg p-6" aria-labelledby="form-title">
+    <h2 id="form-title" class="text-subtitle font-semibold">Formulario</h2>
+    <form class="grid gap-4 sm:grid-cols-2" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <app-text-field label="Nombre(s)" formControlName="name" autocomplete="given-name" />
+      <app-text-field
+        label="Correo electrónico"
+        type="email"
+        formControlName="email"
+        autocomplete="email"
+        hint="Te enviaremos tu enlace personal."
+      />
+      <app-text-field
+        label="Teléfono"
+        type="tel"
+        formControlName="phone"
+        placeholder="+591 7xxxxxxx"
+        inputMode="tel"
+      />
+      <app-select-field label="Categoría" formControlName="category" [options]="categories" />
+      <app-text-field
+        label="Fecha y hora de inicio"
+        type="datetime-local"
+        formControlName="startsAt"
+      />
+      <app-text-field
+        label="Capacidad"
+        type="number"
+        formControlName="capacity"
+        inputMode="numeric"
+        [errorMessages]="{ min: 'La capacidad debe ser al menos 1.' }"
+      />
+      <app-text-field
+        class="sm:col-span-2"
+        label="Descripción"
+        type="textarea"
+        formControlName="description"
+      />
+      <app-toggle
+        class="sm:col-span-2"
+        label="Evento gratuito"
+        formControlName="free"
+        hint="Oculta el QR y el comprobante."
+      />
+      <app-file-dropzone
+        class="sm:col-span-2"
+        label="Comprobante de pago"
+        formControlName="voucher"
+        hint="Foto o PDF del comprobante de tu transferencia."
+        [progress]="uploadProgress()"
+      />
+      <app-checkbox
+        class="sm:col-span-2"
+        label="Acepto la política de privacidad"
+        formControlName="privacy"
+        [errorMessages]="{ required: 'Debes aceptar la política de privacidad.' }"
+      />
+      <div class="flex gap-3 sm:col-span-2">
+        <button app-button variant="primary" type="submit">Enviar inscripción</button>
+        <button app-button type="button" (click)="form.reset()">Limpiar</button>
+      </div>
+    </form>
+  </section>
+
+  <app-card
+    title="Pasos y tarjeta"
+    description="Stepper del asistente de eventos (ORG-02..04) dentro de una app-card."
+  >
+    <button cardActions app-button size="sm" type="button" (click)="step.set(1)">Reiniciar</button>
+    <app-stepper [steps]="wizardSteps" [(current)]="step" navigable />
+    <div class="flex gap-3">
+      <button app-button type="button" [disabled]="step() === 1" (click)="step.set(step() - 1)">
+        Anterior
+      </button>
+      <button
+        app-button
+        variant="primary"
+        type="button"
+        [disabled]="step() === wizardSteps.length"
+        (click)="step.set(step() + 1)"
+      >
+        Continuar
+      </button>
+    </div>
+  </app-card>
+
+  <section class="glass flex flex-col gap-4 rounded-lg p-6" aria-labelledby="actions-title">
+    <h2 id="actions-title" class="text-subtitle font-semibold">Menú, tooltips y drawer</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <button
+        app-button
+        variant="approve"
+        square
+        type="button"
+        aria-label="Aprobar"
+        appTooltip="Aprobar"
+        appTooltipShortcut="A"
+      >
+        <svg lucideCheck aria-hidden="true"></svg>
+      </button>
+      <button
+        app-button
+        square
+        type="button"
+        aria-label="Exportar CSV"
+        appTooltip="Exportar CSV"
+        (click)="toast.show('Exportando participantes…')"
+      >
+        <svg lucideDownload aria-hidden="true"></svg>
+      </button>
+      <button
+        app-button
+        square
+        type="button"
+        aria-label="Más acciones"
+        appTooltip="Más acciones"
+        [appMenuTrigger]="actionsMenu"
+      >
+        <svg lucideEllipsisVertical aria-hidden="true"></svg>
+      </button>
+      <ng-template #actionsMenu>
+        <div appMenu>
+          <button appMenuItem (triggered)="toast.show('Editar datos')">
+            <svg lucidePencil [size]="18" aria-hidden="true"></svg>
+            Editar datos
+          </button>
+          <button appMenuItem (triggered)="toast.show('Descargar comprobante')">
+            <svg lucideDownload [size]="18" aria-hidden="true"></svg>
+            Descargar comprobante
+          </button>
+          <button appMenuItem danger (triggered)="toast.show('Revertir aprobación')">
+            Revertir aprobación
+          </button>
+        </div>
+      </ng-template>
+      <button app-button type="button" (click)="openDrawer()">
+        <svg lucideMenu aria-hidden="true"></svg>
+        Abrir menú lateral
+      </button>
+    </div>
+  </section>
+
+  <section class="glass flex flex-col gap-4 rounded-lg p-6" aria-labelledby="overlay-title">
+    <h2 id="overlay-title" class="text-subtitle font-semibold">Diálogos y avisos</h2>
+    <div class="flex flex-wrap gap-3">
+      <button app-button type="button" (click)="confirmPublish()">Publicar evento</button>
+      <button app-button variant="reject" type="button" (click)="confirmDelete()">
+        Eliminar borrador
+      </button>
+      <button app-button type="button" (click)="toast.success('Pago aprobado.')">
+        Aviso de éxito
+      </button>
+      <button app-button type="button" (click)="toast.show('Guardamos el borrador.')">
+        Aviso informativo
+      </button>
+      <button
+        app-button
+        type="button"
+        (click)="
+          toast.error('No pudimos guardar los cambios. Revisa tu conexión e inténtalo de nuevo.')
+        "
+      >
+        Aviso de error
+      </button>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-4" aria-labelledby="table-title">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h2 id="table-title" class="text-subtitle font-semibold">Tabla</h2>
+        <p class="text-meta text-muted" aria-live="polite">
+          {{ selection().length }} seleccionados
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <app-filter-chips
+          label="Filtrar por estado"
+          [options]="tableFilterOptions"
+          [(value)]="tableFilter"
+          (valueChange)="page.set(1)"
+        />
+        <button app-button size="sm" type="button" (click)="loading.set(!loading())">
+          {{ loading() ? 'Mostrar datos' : 'Simular carga' }}
+        </button>
+      </div>
+    </div>
+    <app-data-table
+      caption="Participantes de ejemplo"
+      interactive
+      selectable
+      [(selection)]="selection"
+      [columns]="columns"
+      [rows]="pageRows()"
+      [loading]="loading()"
+      [trackBy]="trackByCode"
+      [(sort)]="sort"
+      (rowActivate)="toast.show('Abrir ' + $event.name)"
+    >
+      <ng-template appCell="status" let-row>
+        <app-status-badge [status]="row.status" />
+      </ng-template>
+      <app-empty-state
+        empty
+        title="Sin resultados"
+        description="No hay participantes con este filtro."
+      >
+        <button app-button type="button" (click)="tableFilter.set(null)">Quitar filtro</button>
+      </app-empty-state>
+    </app-data-table>
+    <app-paginator [total]="filteredRows().length" [pageSize]="pageSize" [(page)]="page" />
+  </section>
+</main>

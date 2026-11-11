@@ -4,6 +4,8 @@
  * or the backdrop requires recomputing the worst-case contrast (design-system.md §6).
  */
 @import 'tailwindcss';
+/* Positioning for CDK overlays (dialogs). Our components provide the look. */
+@import '@angular/cdk/overlay-prebuilt.css';
 
 /* Dark mode follows the `dark` class on <html> (set by the inline script in index.html and ThemeService). */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -137,6 +139,8 @@
   --color-info: var(--ew-status-info);
   --color-info-bg: var(--ew-status-info-bg);
   --color-glass-border: var(--ew-glass-border);
+  /* Translucent fill without blur, for controls that sit on a glass panel (§7: blur on containers only). */
+  --color-glass: var(--ew-glass);
 
   --font-sans: 'Outfit', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
@@ -200,6 +204,11 @@
     background: var(--ew-surface);
     border-color: var(--ew-border);
   }
+}
+
+/* Dimmed backdrop behind modals and drawers (§3.1, overlay level). */
+.ew-overlay-backdrop {
+  background: var(--ew-glass-scrim);
 }
 
 /* ---------------------------------------------------------------- Base (§4, §5.4) */

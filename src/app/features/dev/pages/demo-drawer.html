@@ -1,0 +1,16 @@
+<app-drawer-layout title="Menú" [titleId]="titleId">
+  <nav aria-label="Menú público">
+    <ul class="flex flex-col">
+      @for (link of links; track link) {
+        <li>
+          <a
+            href="/"
+            class="flex min-h-11 items-center rounded-sm px-3 font-semibold text-text no-underline hover:bg-surface-2"
+          >
+            {{ link }}
+          </a>
+        </li>
+      }
+    </ul>
+  </nav>
+</app-drawer-layout>

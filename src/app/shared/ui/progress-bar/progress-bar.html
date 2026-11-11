@@ -1,0 +1,14 @@
+<div class="mb-1 flex items-baseline justify-between gap-2 text-secondary">
+  <span [id]="labelId" class="font-semibold">{{ label() }}</span>
+  <span class="text-muted tabular-nums">{{ value() }} / {{ max() }}</span>
+</div>
+<div
+  class="h-2 overflow-hidden rounded-pill bg-surface-2"
+  role="progressbar"
+  [attr.aria-labelledby]="labelId"
+  [attr.aria-valuenow]="value()"
+  aria-valuemin="0"
+  [attr.aria-valuemax]="max()"
+>
+  <div class="h-full rounded-pill bg-primary" [style.width.%]="percent()"></div>
+</div>
