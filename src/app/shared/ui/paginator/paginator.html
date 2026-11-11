@@ -1,0 +1,33 @@
+<p class="text-muted tabular-nums" aria-live="polite">
+  @if (total() > 0) {
+    <ng-container i18n="@@paginator.range">{{ from() }}–{{ to() }} de {{ total() }}</ng-container>
+  } @else {
+    <ng-container i18n="@@paginator.empty">Sin resultados</ng-container>
+  }
+</p>
+<nav class="flex gap-2" aria-label="Paginación" i18n-aria-label="@@paginator.nav">
+  <button
+    app-button
+    size="sm"
+    square
+    type="button"
+    aria-label="Página anterior"
+    i18n-aria-label="@@paginator.previous"
+    [disabled]="page() <= 1"
+    (click)="page.set(page() - 1)"
+  >
+    <svg lucideChevronLeft [size]="18" aria-hidden="true"></svg>
+  </button>
+  <button
+    app-button
+    size="sm"
+    square
+    type="button"
+    aria-label="Página siguiente"
+    i18n-aria-label="@@paginator.next"
+    [disabled]="page() >= pageCount()"
+    (click)="page.set(page() + 1)"
+  >
+    <svg lucideChevronRight [size]="18" aria-hidden="true"></svg>
+  </button>
+</nav>

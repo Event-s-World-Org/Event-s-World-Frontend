@@ -1,0 +1,20 @@
+<label [for]="id" class="flex min-h-11 cursor-pointer items-center gap-3">
+  <input
+    [id]="id"
+    type="checkbox"
+    class="size-5 shrink-0 cursor-pointer accent-primary disabled:cursor-not-allowed"
+    [checked]="value()"
+    [disabled]="disabled()"
+    [attr.aria-invalid]="errorText() ? true : null"
+    [attr.aria-describedby]="describedBy()"
+    (change)="onCheck($event)"
+    (blur)="markTouched()"
+  />
+  <span>{{ label() }}<ng-content /></span>
+</label>
+@if (hint()) {
+  <p [id]="hintId" [class]="hintClasses">{{ hint() }}</p>
+}
+@if (errorText()) {
+  <p [id]="errorId" [class]="errorClasses">{{ errorText() }}</p>
+}

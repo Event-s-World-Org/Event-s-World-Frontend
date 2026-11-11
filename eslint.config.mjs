@@ -61,7 +61,8 @@ export default tseslint.config(
       '@angular-eslint/component-selector': [
         'error',
         {
-          type: 'element',
+          // Attribute selectors keep native semantics, e.g. <button app-button>.
+          type: ['element', 'attribute'],
           prefix: 'app',
           style: 'kebab-case',
         },

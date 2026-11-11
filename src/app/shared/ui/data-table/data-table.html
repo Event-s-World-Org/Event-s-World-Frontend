@@ -1,0 +1,172 @@
+<!-- Desktop: one glass container, rows are not blurred individually (design-system.md §7). -->
+<div class="glass hidden overflow-x-auto rounded-lg md:block">
+  <table
+    cdk-table
+    [dataSource]="tableRows()"
+    [trackBy]="trackRow"
+    class="w-full text-left text-secondary"
+  >
+    <caption class="sr-only">
+      {{
+        caption()
+      }}
+    </caption>
+
+    <ng-container [cdkColumnDef]="selectColumn">
+      <th cdk-header-cell *cdkHeaderCellDef class="w-12 border-b border-glass-border py-3 pl-4">
+        <input
+          type="checkbox"
+          [class]="checkboxClasses"
+          aria-label="Seleccionar todas las filas"
+          i18n-aria-label="@@table.selectAll"
+          [checked]="allSelected()"
+          [indeterminate]="someSelected()"
+          [disabled]="loading() || rows().length === 0"
+          (change)="toggleAll()"
+        />
+      </th>
+      <td cdk-cell *cdkCellDef="let row" class="w-12 border-b border-glass-border py-3 pl-4">
+        @if (!loading()) {
+          <input
+            type="checkbox"
+            [class]="checkboxClasses"
+            [attr.aria-label]="rowLabel(row)"
+            [checked]="isSelected(row)"
+            (change)="toggleRow(row)"
+            (click)="$event.stopPropagation()"
+            (keydown.enter)="$event.stopPropagation()"
+          />
+        }
+      </td>
+    </ng-container>
+
+    @for (column of columns(); track column.key) {
+      <ng-container [cdkColumnDef]="column.key">
+        <th
+          cdk-header-cell
+          *cdkHeaderCellDef
+          scope="col"
+          class="border-b border-glass-border px-4 py-3 font-semibold"
+          [class.text-right]="column.align === 'end'"
+          [attr.aria-sort]="ariaSort(column.key)"
+        >
+          @if (column.sortable) {
+            <button
+              type="button"
+              class="-mx-2 inline-flex min-h-9 items-center gap-1 rounded-sm px-2 hover:bg-surface-2"
+              (click)="toggleSort(column.key)"
+            >
+              {{ column.header }}
+              @switch (sortDirection(column.key)) {
+                @case ('asc') {
+                  <svg lucideArrowUp [size]="16" aria-hidden="true"></svg>
+                }
+                @case ('desc') {
+                  <svg lucideArrowDown [size]="16" aria-hidden="true"></svg>
+                }
+                @default {
+                  <svg lucideChevronsUpDown class="text-muted" [size]="16" aria-hidden="true"></svg>
+                }
+              }
+            </button>
+          } @else {
+            {{ column.header }}
+          }
+        </th>
+        <td
+          cdk-cell
+          *cdkCellDef="let row"
+          class="border-b border-glass-border px-4 py-3"
+          [class.text-right]="column.align === 'end'"
+          [class.tabular-nums]="column.align === 'end'"
+        >
+          @if (loading()) {
+            <app-skeleton class="h-4 w-24" />
+          } @else {
+            <ng-container
+              *ngTemplateOutlet="
+                cellTemplate(column.key) ?? plainCell;
+                context: { $implicit: row, column }
+              "
+            />
+          }
+        </td>
+      </ng-container>
+    }
+
+    <tr cdk-header-row *cdkHeaderRowDef="columnKeys()"></tr>
+    <tr
+      cdk-row
+      *cdkRowDef="let row; columns: columnKeys()"
+      class="last:[&>td]:border-b-0"
+      [class]="loading() ? '' : rowClasses(row)"
+      [attr.tabindex]="interactive() && !loading() ? 0 : null"
+      (click)="activate(row)"
+      (keydown.enter)="activate(row)"
+    ></tr>
+  </table>
+</div>
+
+<!-- Mobile: one card per row inside a single glass container. -->
+<ul class="glass divide-y divide-glass-border rounded-lg md:hidden" [attr.aria-label]="caption()">
+  @if (loading()) {
+    @for (index of skeletonRows; track index) {
+      <li class="flex flex-col gap-2 p-4" aria-hidden="true">
+        <app-skeleton class="h-4 w-40" />
+        <app-skeleton class="h-3 w-24" />
+      </li>
+    }
+  } @else {
+    @for (row of rows(); track trackRow($index, row)) {
+      <li
+        class="flex flex-col gap-2 p-4"
+        [class]="rowClasses(row)"
+        [attr.tabindex]="interactive() ? 0 : null"
+        (click)="activate(row)"
+        (keydown.enter)="activate(row)"
+      >
+        @let primary = primaryColumn();
+        <div class="flex items-center gap-3 font-semibold">
+          @if (selectable()) {
+            <input
+              type="checkbox"
+              [class]="checkboxClasses"
+              [attr.aria-label]="rowLabel(row)"
+              [checked]="isSelected(row)"
+              (change)="toggleRow(row)"
+              (click)="$event.stopPropagation()"
+              (keydown.enter)="$event.stopPropagation()"
+            />
+          }
+          <ng-container
+            *ngTemplateOutlet="
+              cellTemplate(primary.key) ?? plainCell;
+              context: { $implicit: row, column: primary }
+            "
+          />
+        </div>
+        <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-secondary">
+          @for (column of secondaryColumns(); track column.key) {
+            <dt class="text-muted">{{ column.header }}</dt>
+            <dd class="min-w-0 text-right" [class.tabular-nums]="column.align === 'end'">
+              <ng-container
+                *ngTemplateOutlet="
+                  cellTemplate(column.key) ?? plainCell;
+                  context: { $implicit: row, column }
+                "
+              />
+            </dd>
+          }
+        </dl>
+      </li>
+    }
+  }
+</ul>
+
+@if (!loading() && rows().length === 0) {
+  <div class="glass mt-3 rounded-lg">
+    <ng-content select="[empty]" />
+  </div>
+}
+
+<ng-template #plainCell let-row let-column="column">{{ column.value?.(row) ?? '' }}</ng-template>

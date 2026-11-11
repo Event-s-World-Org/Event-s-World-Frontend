@@ -1,2 +1,27 @@
-// Shared UI component library (TS-012)
-export {};
+// Shared UI component library (TS-012). Visual rules: Docs/design/design-system.md §9.
+export * from './avatar/avatar';
+export * from './button/button';
+export * from './card/card';
+export * from './checkbox/checkbox';
+export * from './data-table/data-table';
+export * from './dialog/confirm-dialog';
+export * from './dialog/dialog-layout';
+export * from './dialog/dialog.service';
+export * from './dialog/drawer-layout';
+export * from './empty-state/empty-state';
+export * from './file-dropzone/file-dropzone';
+export * from './filter-chips/filter-chips';
+export * from './icons';
+export * from './kpi-card/kpi-card';
+export * from './menu/menu';
+export * from './paginator/paginator';
+export * from './progress-bar/progress-bar';
+export * from './select-field/select-field';
+export * from './skeleton/skeleton';
+export * from './status-badge/status-badge';
+export * from './stepper/stepper';
+export * from './text-field/text-field';
+export * from './toast/toast-outlet';
+export * from './toast/toast.service';
+export * from './toggle/toggle';
+export * from './tooltip/tooltip';

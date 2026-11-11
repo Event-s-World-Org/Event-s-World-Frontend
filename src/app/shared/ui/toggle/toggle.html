@@ -1,0 +1,26 @@
+<button
+  type="button"
+  role="switch"
+  [id]="id"
+  class="flex min-h-11 w-full items-center justify-between gap-4 text-left disabled:cursor-not-allowed disabled:opacity-60"
+  [attr.aria-checked]="value()"
+  [attr.aria-describedby]="describedBy()"
+  [disabled]="disabled()"
+  (click)="toggle()"
+  (blur)="markTouched()"
+>
+  <span class="font-semibold">{{ label() }}</span>
+  <span
+    class="relative h-7 w-12 shrink-0 rounded-pill border transition-colors duration-150"
+    [class]="value() ? 'border-primary bg-primary' : 'border-control bg-surface-2'"
+    aria-hidden="true"
+  >
+    <span
+      class="absolute top-0.5 left-0.5 size-5.5 rounded-pill bg-surface shadow transition-transform duration-150"
+      [class]="value() ? 'translate-x-5' : 'translate-x-0'"
+    ></span>
+  </span>
+</button>
+@if (hint()) {
+  <p [id]="hintId" [class]="hintClasses">{{ hint() }}</p>
+}
