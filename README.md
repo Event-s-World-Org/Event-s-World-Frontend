@@ -68,6 +68,22 @@ The visual system is specified in `Docs/design/design-system.md` (ADR-0008) and 
 
 In development, open `http://localhost:4200/dev/tokens` to check every token, glass level and the worst-case contrast in both themes. The page does not exist in production builds.
 
+### Shared UI components (`shared/ui`)
+
+Standalone, accessible components built on the tokens and the Angular CDK. Open `http://localhost:4200/dev/ui` (development only) to see all of them in both themes.
+
+| Group | Components |
+|---|---|
+| Actions | `button[app-button]` / `a[app-button]` (`primary`, `secondary`, `ghost`, `approve`, `observe`, `reject`; `size`, `square`, `loading`) |
+| Display | `app-card`, `app-status-badge`, `app-filter-chips`, `app-avatar`, `app-progress-bar`, `app-kpi-card`, `app-empty-state`, `app-skeleton`, `app-stepper` |
+| Forms (Reactive Forms) | `app-text-field` (text, email, tel, password, number, date, datetime-local, textarea), `app-select-field`, `app-checkbox`, `app-toggle`, `app-file-dropzone` (type and size check, drag and drop, upload progress). Errors show after blur and clear as soon as the value is valid |
+| Overlays | `DialogService.confirm()` (named confirmation, Cancel focused), `DialogService.open()` + `app-dialog-layout`, `DialogService.openDrawer()` + `app-drawer-layout`, `appMenuTrigger` / `appMenu` / `appMenuItem` (CDK menu), `appTooltip` (with optional `appTooltipShortcut`), `ToastService` + `app-toast-outlet` (already in the root component) |
+| Data | `app-data-table` (CDK table; cards on mobile; sorting emitted for the server; row selection with `selectable` and `[(selection)]`; `appCell` templates) and `app-paginator` |
+
+Every component keeps its class, template and styles in separate files (`name.ts`, `name.html`, `name.css`).
+
+Icons come from `@lucide/angular`. Add `provideIcons()` (from `shared/ui`) to the root route of each lazy feature; do not import Lucide in the root component or `app.config.ts`, or the whole icon chunk enters the initial bundle.
+
 ## Linting & Testing
 
 ```bash
