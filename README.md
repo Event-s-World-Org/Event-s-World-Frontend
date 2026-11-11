@@ -1,59 +1,67 @@
-# EventsWorld
+# Event's World · Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.5.
+Angular 21 application configured with zoneless change detection, hybrid rendering (`@angular/ssr`), Tailwind CSS v4, Angular CDK, and Lucide icons.
 
-## Development server
+## Prerequisites
 
-To start a local development server, run:
+- **Node.js:** v22+
+- **npm:** v10+
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Install dependencies:
 
 ```bash
-ng generate component component-name
+npm install
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Running the Application
+
+### 1. Development Server (Hybrid SSR enabled by default)
+
+Starts the Angular development server with SSR on routes configured with `RenderMode.Server` (`/` and `/e/:slug`), prerendering on `/legal/*`, and CSR on all other routes:
 
 ```bash
-ng generate --help
+npm start
 ```
 
-## Building
+Open `http://localhost:4200/` in your browser.
 
-To build the project run:
+### 2. Production Build & SSR Node Server (With SSR)
+
+Build the browser, server, and prerendered bundles, then start the Express SSR server:
 
 ```bash
-ng build
+npm run build
+npm run serve:ssr:EventsWorld
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+The SSR server listens on `http://localhost:4000/` (or the `PORT` environment variable).
 
-## Running unit tests
+### 3. Running Without SSR (Client-Side Only)
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+To run the development server without SSR/prerendering:
 
 ```bash
-ng test
+npx ng serve --no-ssr --no-prerender
 ```
 
-## Running end-to-end tests
+## Project Structure
 
-For end-to-end (e2e) testing, run:
+```text
+src/app/
+├─ core/          Singletons: api, auth, config, errors, theme, seo
+├─ shared/        Reusable building blocks: ui, forms, pipes
+├─ layouts/       Application layout shells (public, participant, auth, organizer, admin)
+└─ features/      Lazy-loaded feature areas (public, participant, auth, organizer, admin)
+```
+
+> **Architecture boundary rule:** Features under `src/app/features/*` cannot import from one another. Shared code must live in `src/app/shared/` or `src/app/core/`.
+
+## Linting & Testing
 
 ```bash
-ng e2e
+# Static analysis and feature boundary checks
+npm run lint
+
+# Unit tests (Vitest)
+npm test
 ```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

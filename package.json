@@ -6,7 +6,9 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "lint": "eslint src/",
+    "serve:ssr:EventsWorld": "node dist/EventsWorld/server/server.mjs"
   },
   "prettier": {
     "printWidth": 100,
@@ -23,21 +25,35 @@
   "private": true,
   "packageManager": "npm@11.7.0",
   "dependencies": {
-    "@angular/common": "^21.0.0",
-    "@angular/compiler": "^21.0.0",
-    "@angular/core": "^21.0.0",
-    "@angular/forms": "^21.0.0",
-    "@angular/platform-browser": "^21.0.0",
-    "@angular/router": "^21.0.0",
+    "@angular/cdk": "^21.2.14",
+    "@angular/common": "^21.2.26",
+    "@angular/compiler": "^21.2.26",
+    "@angular/core": "^21.2.26",
+    "@angular/forms": "^21.2.26",
+    "@angular/localize": "^21.2.26",
+    "@angular/platform-browser": "^21.2.26",
+    "@angular/platform-server": "^21.2.26",
+    "@angular/router": "^21.2.26",
+    "@angular/ssr": "^21.2.29",
+    "express": "^5.2.1",
+    "@lucide/angular": "^1.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@angular/build": "^21.0.5",
-    "@angular/cli": "^21.0.5",
-    "@angular/compiler-cli": "^21.0.0",
+    "@angular/build": "^21.2.29",
+    "@angular/cli": "^21.2.29",
+    "@angular/compiler-cli": "^21.2.26",
+    "@tailwindcss/postcss": "^4.1.0",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.0",
+    "angular-eslint": "^21.0.0",
+    "eslint": "^9.18.0",
     "jsdom": "^27.1.0",
+    "postcss": "^8.5.0",
+    "tailwindcss": "^4.1.0",
     "typescript": "~5.9.2",
+    "typescript-eslint": "^8.20.0",
     "vitest": "^4.0.8"
   }
 }
