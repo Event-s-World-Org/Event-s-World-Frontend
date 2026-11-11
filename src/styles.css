@@ -1,1 +1,238 @@
+/*
+ * Salar Cristal design system (ADR-0008).
+ * Single source of truth: Docs/design/design-system.md. Any change to colours, glass opacity
+ * or the backdrop requires recomputing the worst-case contrast (design-system.md §6).
+ */
 @import 'tailwindcss';
+
+/* Dark mode follows the `dark` class on <html> (set by the inline script in index.html and ThemeService). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------- Tokens (§2–4) */
+:root {
+  color-scheme: light;
+
+  --ew-bg: #e6f0fb;
+  --ew-surface: #ffffff;
+  --ew-surface-2: #ebf1f7;
+  --ew-border: #d3dee9;
+  --ew-control-border: #5a6b80;
+  --ew-text: #0e1b2a;
+  --ew-muted: #3e5367;
+  --ew-primary: #0b63b6;
+  --ew-primary-hover: #09528f;
+  --ew-on-primary: #ffffff;
+  --ew-accent: #e5533b;
+  --ew-chart: #0b63b6;
+
+  /* Statuses (§2.2): text / background */
+  --ew-status-pending: #8a3b0a;
+  --ew-status-pending-bg: #fef3c7;
+  --ew-status-approved: #166534;
+  --ew-status-approved-bg: #dcfce7;
+  --ew-status-observed: #5b21b6;
+  --ew-status-observed-bg: #ede9fe;
+  --ew-status-rejected: #991b1b;
+  --ew-status-rejected-bg: #fee2e2;
+  --ew-status-info: #1e40af;
+  --ew-status-info-bg: #dbeafe;
+
+  /* Glass (§3) */
+  --ew-glass: rgba(255, 255, 255, 0.5);
+  --ew-glass-overlay: rgba(255, 255, 255, 0.72);
+  --ew-glass-scrim: rgba(10, 18, 28, 0.35);
+  --ew-glass-border: rgba(255, 255, 255, 0.72);
+  --ew-glass-highlight: rgba(255, 255, 255, 0.85);
+  --ew-glass-shadow: 0 10px 30px rgba(14, 27, 42, 0.14);
+  --ew-blur: blur(22px) saturate(180%);
+
+  /* Sky backdrop (§4). Spot 1 is the worst case used for contrast (§6). */
+  --ew-sky-1: rgba(11, 99, 182, 0.45);
+  --ew-sky-2: rgba(229, 83, 59, 0.42);
+  --ew-sky-3: rgba(90, 176, 255, 0.55);
+  --ew-sky-4: rgba(229, 83, 59, 0.3);
+  --ew-sky-top: #e6f0fb;
+  --ew-sky-bottom: #f6eeec;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --ew-bg: #0a121c;
+  --ew-surface: #111c29;
+  --ew-surface-2: #182638;
+  --ew-border: #28394f;
+  --ew-control-border: #7f95b0;
+  --ew-text: #eaf2fa;
+  --ew-muted: #9ab0c6;
+  --ew-primary: #5ab0ff;
+  --ew-primary-hover: #84c4ff;
+  --ew-on-primary: #04192e;
+  --ew-accent: #ff8a73;
+  --ew-chart: #5ab0ff;
+
+  --ew-status-pending: #fcd34d;
+  --ew-status-pending-bg: #3a2a08;
+  --ew-status-approved: #86efac;
+  --ew-status-approved-bg: #0b3b22;
+  --ew-status-observed: #c4b5fd;
+  --ew-status-observed-bg: #2e1a5e;
+  --ew-status-rejected: #fca5a5;
+  --ew-status-rejected-bg: #4a1515;
+  --ew-status-info: #93c5fd;
+  --ew-status-info-bg: #172554;
+
+  --ew-glass: rgba(17, 28, 41, 0.45);
+  --ew-glass-overlay: rgba(17, 28, 41, 0.72);
+  --ew-glass-scrim: rgba(0, 0, 0, 0.55);
+  --ew-glass-border: rgba(255, 255, 255, 0.16);
+  --ew-glass-highlight: rgba(255, 255, 255, 0.14);
+  --ew-glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --ew-blur: blur(22px) saturate(160%);
+
+  --ew-sky-1: rgba(90, 176, 255, 0.45);
+  --ew-sky-2: rgba(255, 138, 115, 0.3);
+  --ew-sky-3: rgba(11, 99, 182, 0.55);
+  --ew-sky-4: rgba(255, 138, 115, 0.22);
+  --ew-sky-top: #08172a;
+  --ew-sky-bottom: #0a121c;
+}
+
+:root,
+.dark {
+  --ew-backdrop:
+    radial-gradient(42% 30% at 10% 6%, var(--ew-sky-1), transparent 70%),
+    radial-gradient(40% 30% at 94% 22%, var(--ew-sky-2), transparent 72%),
+    radial-gradient(50% 34% at 26% 64%, var(--ew-sky-3), transparent 72%),
+    radial-gradient(40% 28% at 86% 92%, var(--ew-sky-4), transparent 70%),
+    linear-gradient(180deg, var(--ew-sky-top), var(--ew-sky-bottom));
+}
+
+/* ---------------------------------------------------------------- Tailwind mapping (§5, §8) */
+@theme inline {
+  /* Only Salar Cristal colours are available: Tailwind's default palette is removed. */
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-bg: var(--ew-bg);
+  --color-surface: var(--ew-surface);
+  --color-surface-2: var(--ew-surface-2);
+  --color-border: var(--ew-border);
+  --color-control: var(--ew-control-border);
+  --color-text: var(--ew-text);
+  --color-muted: var(--ew-muted);
+  --color-primary: var(--ew-primary);
+  --color-primary-hover: var(--ew-primary-hover);
+  --color-on-primary: var(--ew-on-primary);
+  --color-accent: var(--ew-accent);
+  --color-chart: var(--ew-chart);
+  --color-pending: var(--ew-status-pending);
+  --color-pending-bg: var(--ew-status-pending-bg);
+  --color-approved: var(--ew-status-approved);
+  --color-approved-bg: var(--ew-status-approved-bg);
+  --color-observed: var(--ew-status-observed);
+  --color-observed-bg: var(--ew-status-observed-bg);
+  --color-rejected: var(--ew-status-rejected);
+  --color-rejected-bg: var(--ew-status-rejected-bg);
+  --color-info: var(--ew-status-info);
+  --color-info-bg: var(--ew-status-info-bg);
+  --color-glass-border: var(--ew-glass-border);
+
+  --font-sans: 'Outfit', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Minor Third scale over 12 / 14 / 16 px (§5.1) */
+  --text-meta: 0.75rem;
+  --text-meta--line-height: 1.4;
+  --text-secondary: 0.875rem;
+  --text-secondary--line-height: 1.5;
+  --text-body: 1rem;
+  --text-body--line-height: 1.55;
+  --text-subtitle: 1.2rem;
+  --text-subtitle--line-height: 1.25;
+  --text-title: 1.44rem;
+  --text-title--line-height: 1.2;
+  --text-event-title: 1.728rem;
+  --text-event-title--line-height: 1.15;
+  --text-display: 2.074rem;
+  --text-display--line-height: 1.1;
+
+  /* Soft corners (§5.3) */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+}
+
+/* ---------------------------------------------------------------- Glass (§3, §6 rule 2) */
+@utility glass {
+  background: var(--ew-glass);
+  border: 1px solid var(--ew-glass-border);
+  backdrop-filter: var(--ew-blur);
+  -webkit-backdrop-filter: var(--ew-blur);
+  box-shadow:
+    inset 0 1px 0 var(--ew-glass-highlight),
+    var(--ew-glass-shadow);
+}
+
+@utility glass-overlay {
+  background: var(--ew-glass-overlay);
+  border: 1px solid var(--ew-glass-border);
+  backdrop-filter: var(--ew-blur);
+  -webkit-backdrop-filter: var(--ew-blur);
+  box-shadow:
+    inset 0 1px 0 var(--ew-glass-highlight),
+    var(--ew-glass-shadow);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass-overlay {
+    background: var(--ew-surface);
+    border-color: var(--ew-border);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass,
+  .glass-overlay {
+    background: var(--ew-surface);
+    border-color: var(--ew-border);
+  }
+}
+
+/* ---------------------------------------------------------------- Base (§4, §5.4) */
+@layer base {
+  body {
+    min-height: 100dvh;
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    color: var(--ew-text);
+    background: var(--ew-bg);
+  }
+
+  /* Fixed backdrop on a pseudo-element: background-attachment: fixed is unreliable on iOS Safari. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: var(--ew-backdrop);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ew-primary);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0s !important;
+      animation-duration: 0s !important;
+    }
+  }
+}
