@@ -1,0 +1,86 @@
+<span [id]="labelId" [class]="labelClasses">
+  {{ label() }}
+  @if (required()) {
+    <span class="text-rejected" aria-hidden="true">*</span>
+  }
+</span>
+
+@if (value(); as file) {
+  <div class="flex items-center gap-3 rounded-md border border-control bg-glass p-3">
+    @if (previewUrl(); as url) {
+      <img [src]="url" alt="" class="size-14 shrink-0 rounded-sm object-cover" />
+    } @else {
+      <span
+        class="flex size-14 shrink-0 items-center justify-center rounded-sm bg-surface-2 text-muted"
+      >
+        <svg lucideFileText [size]="24" aria-hidden="true"></svg>
+      </span>
+    }
+    <div class="min-w-0 flex-1">
+      <p class="truncate font-semibold">{{ file.name }}</p>
+      <p class="text-meta text-muted tabular-nums">{{ fileSize() }}</p>
+      @if (progress() !== null) {
+        <app-progress-bar
+          class="mt-2"
+          label="Subiendo"
+          i18n-label="@@files.uploading"
+          [value]="progress() ?? 0"
+          [max]="100"
+        />
+      }
+    </div>
+    <button
+      app-button
+      size="sm"
+      type="button"
+      [disabled]="disabled() || progress() !== null"
+      (click)="remove()"
+      i18n="@@files.remove"
+    >
+      Quitar
+    </button>
+  </div>
+} @else {
+  <input
+    [id]="id"
+    type="file"
+    class="peer sr-only"
+    [accept]="acceptAttr()"
+    [disabled]="disabled()"
+    [attr.aria-labelledby]="labelId"
+    [attr.aria-describedby]="inputDescribedBy()"
+    [attr.aria-invalid]="shownError() ? true : null"
+    (change)="onPick($event)"
+    (blur)="markTouched()"
+  />
+  <label
+    [for]="id"
+    class="flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed bg-glass p-6 text-center transition-colors duration-150 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary peer-disabled:cursor-not-allowed peer-disabled:opacity-60"
+    [class]="
+      dragging()
+        ? 'border-primary bg-surface-2'
+        : shownError()
+          ? 'border-rejected'
+          : 'border-control hover:bg-surface-2'
+    "
+    (dragover)="onDragOver($event)"
+    (dragleave)="dragging.set(false)"
+    (drop)="onDrop($event)"
+  >
+    <svg lucideUpload class="text-primary" [size]="24" aria-hidden="true"></svg>
+    <span>
+      <span class="font-semibold text-primary" i18n="@@files.choose">Elegir archivo</span>
+      <span class="text-muted" i18n="@@files.orDrag"> o arrástralo aquí</span>
+    </span>
+    <span [id]="instructionsId" class="text-meta text-muted" i18n="@@files.instructions">
+      {{ formats() }} · máximo {{ maxSizeMb() }} MB
+    </span>
+  </label>
+}
+
+@if (hint()) {
+  <p [id]="hintId" [class]="hintClasses">{{ hint() }}</p>
+}
+@if (shownError()) {
+  <p [id]="errorId" [class]="errorClasses">{{ shownError() }}</p>
+}
