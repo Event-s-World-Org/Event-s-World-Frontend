@@ -1,0 +1,39 @@
+<div class="flex flex-col gap-2" role="status" aria-live="polite">
+  @for (toast of polite(); track toast.id) {
+    <ng-container *ngTemplateOutlet="item; context: { $implicit: toast }" />
+  }
+</div>
+<div class="flex flex-col gap-2" role="alert" aria-live="assertive">
+  @for (toast of assertive(); track toast.id) {
+    <ng-container *ngTemplateOutlet="item; context: { $implicit: toast }" />
+  }
+</div>
+
+<ng-template #item let-toast>
+  <div
+    class="pointer-events-auto flex items-start gap-3 rounded-md bg-text p-3 pl-4 text-bg shadow-lg"
+  >
+    <p class="flex-1 py-1.5 text-secondary">{{ toast.message }}</p>
+    <button
+      type="button"
+      class="-m-1 flex size-9 shrink-0 items-center justify-center rounded-sm hover:opacity-80 pointer-coarse:size-11"
+      aria-label="Cerrar aviso"
+      i18n-aria-label="@@toast.close"
+      (click)="service.dismiss(toast.id)"
+    >
+      <!-- Inline icon: the root component must not pull the Lucide chunk into the initial bundle. -->
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.75"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <path d="M18 6 6 18M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+</ng-template>

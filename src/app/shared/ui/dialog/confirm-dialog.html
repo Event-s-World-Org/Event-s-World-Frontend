@@ -1,0 +1,29 @@
+<app-dialog-layout [title]="data.title" [titleId]="titleId">
+  <p class="text-muted">{{ data.message }}</p>
+  @if (data.confirmationText) {
+    <label [for]="inputId" [class]="labelClasses" class="mt-4" i18n="@@dialog.typeToConfirm">
+      Escribe <strong>{{ data.confirmationText }}</strong> para confirmar
+    </label>
+    <input
+      [id]="inputId"
+      type="text"
+      autocomplete="off"
+      [class]="fieldClasses"
+      (input)="onType($event)"
+    />
+  }
+  <ng-container actions>
+    <button app-button type="button" data-autofocus (click)="dialogRef.close(false)">
+      {{ data.cancelLabel ?? cancelDefault }}
+    </button>
+    <button
+      app-button
+      type="button"
+      [variant]="data.tone === 'danger' ? 'reject' : 'primary'"
+      [disabled]="!canConfirm()"
+      (click)="dialogRef.close(true)"
+    >
+      {{ data.confirmLabel }}
+    </button>
+  </ng-container>
+</app-dialog-layout>
