@@ -1,6 +1,12 @@
+import { isDevMode } from '@angular/core';
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
+  {
+    path: 'dev',
+    canMatch: [() => isDevMode()],
+    loadChildren: () => import('./features/dev/dev.routes').then((m) => m.DEV_ROUTES),
+  },
   {
     path: 'admin',
     loadChildren: () =>
