@@ -1,0 +1,6 @@
+<p class="text-secondary text-muted">{{ label() }}</p>
+<p class="text-title font-bold tabular-nums">{{ value() }}</p>
+@if (hint()) {
+  <p class="text-meta text-muted">{{ hint() }}</p>
+}
+<ng-content />

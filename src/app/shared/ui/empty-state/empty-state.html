@@ -1,0 +1,10 @@
+<span class="flex size-12 items-center justify-center rounded-pill bg-surface-2 text-muted">
+  <svg lucideInbox [size]="24" aria-hidden="true"></svg>
+</span>
+<p class="text-subtitle font-semibold">{{ title() }}</p>
+@if (description()) {
+  <p class="max-w-md text-muted">{{ description() }}</p>
+}
+<div class="mt-1 flex flex-wrap justify-center gap-2">
+  <ng-content />
+</div>
