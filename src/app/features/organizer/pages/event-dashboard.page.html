@@ -1,0 +1,173 @@
+<div class="min-h-screen text-text pb-20 font-sans">
+  
+  <header class="sticky top-0 z-30 glass border-b border-white/20 dark:border-white/10 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <a routerLink="/panel/eventos" aria-label="Volver a mis eventos" class="p-2 -ml-2 text-text hover:text-primary transition-colors cursor-pointer flex items-center justify-center">
+        <svg lucideArrowLeft class="w-5 h-5"></svg>
+      </a>
+      <div>
+        <h1 class="text-base font-bold leading-tight flex items-center gap-1.5 text-text">
+          Dashboard
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300 border border-sky-400/30">
+            <svg lucideZap class="w-3 h-3 text-sky-600 dark:text-sky-400"></svg>
+            EN VIVO
+          </span>
+        </h1>
+        <p class="text-xs text-muted">{{ eventTitle() }}</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      
+      <a routerLink="/panel/eventos/demo/presencial" class="text-xs font-bold bg-primary hover:bg-primary-hover active:scale-[0.98] text-on-primary px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-[0_6px_18px_rgba(11,99,182,0.35)] transition-all cursor-pointer">
+        <svg lucidePlus class="w-3.5 h-3.5"></svg>
+        <span>Inscripción presencial</span>
+      </a>
+
+      <button 
+        type="button" 
+        (click)="toggleTheme()" 
+        aria-label="Cambiar tema claro/oscuro"
+        class="p-2 rounded-xl glass border border-border/40 hover:text-primary transition-all text-base cursor-pointer flex items-center justify-center">
+        @if (isDark()) {
+          <svg lucideSun class="w-4 h-4 text-amber-400"></svg>
+        } @else {
+          <svg lucideMoon class="w-4 h-4 text-primary"></svg>
+        }
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-[420px] mx-auto px-4 pt-3 space-y-4">
+    
+    <div class="glass rounded-2xl p-4 border border-white/20 dark:border-white/10 shadow-md space-y-2.5">
+      <div class="flex items-start justify-between">
+        <div>
+          <span class="text-[11px] text-muted uppercase font-bold block">Evento Seleccionado</span>
+          <h2 class="text-base font-extrabold text-text">{{ eventTitle() }}</h2>
+        </div>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          {{ eventStatus() }}
+        </span>
+      </div>
+
+      <div class="glass p-2.5 rounded-xl border border-border/40 flex items-center justify-between text-xs">
+        <div class="truncate mr-2">
+          <span class="text-[10px] text-muted block uppercase font-medium">Enlace de inscripción</span>
+          <span class="font-mono text-primary truncate block">{{ publicUrl() }}</span>
+        </div>
+        <button 
+          type="button" 
+          (click)="copyLink()"
+          class="px-2.5 py-1 glass rounded-lg text-[11px] font-bold text-text hover:text-primary cursor-pointer flex items-center gap-1">
+          @if (copied()) {
+            <svg lucideCheck class="w-3.5 h-3.5 text-emerald-500"></svg>
+            <span>Copiado</span>
+          } @else {
+            <svg lucideCopy class="w-3.5 h-3.5"></svg>
+            <span>Copiar</span>
+          }
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      
+      <div class="glass rounded-2xl p-4 border border-white/20 dark:border-white/10 shadow-lg space-y-1">
+        <span class="text-[11px] uppercase font-bold text-muted block">Dinero real (confirmado)</span>
+        <span class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 num block">
+          {{ store.totalCollected() }} BOB
+        </span>
+        <span class="text-[10px] text-muted block">Pagos cobrados en ledger</span>
+      </div>
+
+      <div class="glass rounded-2xl p-4 border border-white/20 dark:border-white/10 shadow-lg space-y-1">
+        <span class="text-[11px] uppercase font-bold text-muted block">Por cobrar (Cuotas)</span>
+        <span class="text-2xl font-extrabold text-amber-600 dark:text-amber-400 num block">
+          {{ store.pendingBalance() }} BOB
+        </span>
+        <span class="text-[10px] text-muted block">Saldo pendiente de pago</span>
+      </div>
+    </div>
+
+    <div class="glass rounded-2xl p-4 border border-white/20 dark:border-white/10 shadow-md space-y-2.5">
+      <span class="text-xs font-bold uppercase text-muted block">Desglose de Caja</span>
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <div class="glass p-3 rounded-xl border border-border/30">
+          <div class="flex items-center gap-1.5 text-muted mb-1">
+            <svg lucideBanknote class="w-4 h-4 text-emerald-500"></svg>
+            <span class="font-semibold">Efectivo en mano</span>
+          </div>
+          <span class="text-lg font-bold text-emerald-600 dark:text-emerald-400 num">
+            {{ store.cashCollected() }} BOB
+          </span>
+        </div>
+
+        <div class="glass p-3 rounded-xl border border-border/30">
+          <div class="flex items-center gap-1.5 text-muted mb-1">
+            <svg lucideQrCode class="w-4 h-4 text-primary"></svg>
+            <span class="font-semibold">QR Bancario</span>
+          </div>
+          <span class="text-lg font-bold text-primary num">
+            {{ store.qrCollected() }} BOB
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass rounded-2xl p-4 border border-white/20 dark:border-white/10 shadow-md space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase text-muted">Inscritos</span>
+        <span class="text-sm font-bold text-text num">{{ store.totalAttendeesCount() }} / {{ capacityMax() }} cupos</span>
+      </div>
+
+      <div class="w-full h-2.5 glass rounded-full overflow-hidden p-0.5 border border-border/40">
+        <div class="h-full bg-primary rounded-full transition-all" [style.width.%]="(store.totalAttendeesCount() / capacityMax()) * 100"></div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 pt-1 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span class="text-muted">Aprobados 100%:</span>
+          <strong class="text-text num ml-auto">{{ store.paidAttendeesCount() }}</strong>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+          <span class="text-muted">En Cuotas:</span>
+          <strong class="text-text num ml-auto">{{ store.installmentAttendeesCount() }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-2 pt-1">
+      <a routerLink="/panel/eventos/demo/presencial" class="w-full bg-primary hover:bg-primary-hover active:scale-[0.98] text-on-primary font-bold p-3.5 rounded-2xl shadow-[0_6px_18px_rgba(11,99,182,0.35)] flex items-center justify-between text-sm transition-all cursor-pointer">
+        <div class="flex items-center gap-2.5">
+          <svg lucideZap class="w-4 h-4"></svg>
+          <span>Inscripción presencial (ORG-09)</span>
+        </div>
+        <svg lucideArrowRight class="w-4 h-4"></svg>
+      </a>
+
+      <a routerLink="/panel/eventos/demo/participantes" class="w-full glass hover:bg-surface/40 text-text font-semibold p-3.5 rounded-2xl border border-white/20 dark:border-white/10 flex items-center justify-between text-sm transition-all shadow-sm cursor-pointer">
+        <div class="flex items-center gap-2.5">
+          <svg lucideUsers class="w-4 h-4 text-muted"></svg>
+          <span>Ver Participantes (ORG-06)</span>
+        </div>
+        <span class="text-xs text-muted num">{{ store.totalAttendeesCount() }} registrados</span>
+      </a>
+
+      <button 
+        type="button" 
+        (click)="exportToExcel()"
+        class="w-full glass hover:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-bold p-3.5 rounded-2xl border border-emerald-500/30 flex items-center justify-between text-sm transition-all shadow-sm cursor-pointer">
+        <div class="flex items-center gap-2.5">
+          <svg lucideFileSpreadsheet class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></svg>
+          <span>Descargar registros en Excel (.csv)</span>
+        </div>
+        <svg lucideDownload class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></svg>
+      </button>
+    </div>
+  </main>
+</div>

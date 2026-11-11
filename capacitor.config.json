@@ -1,0 +1,9 @@
+{
+  "appId": "app.eventsworld.organizer",
+  "appName": "Event's World",
+  "webDir": "dist/EventsWorld/browser",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  }
+}

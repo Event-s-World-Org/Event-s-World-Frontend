@@ -1,0 +1,554 @@
+<div class="min-h-screen text-text pb-20 font-sans">
+
+  <header class="sticky top-0 z-30 glass border-b border-white/20 dark:border-white/10 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      @if (currentStep() === 2) {
+        <button type="button" (click)="goToStep1()" aria-label="Volver a datos" class="p-2 -ml-2 text-text hover:text-primary transition-colors cursor-pointer flex items-center justify-center">
+          <svg lucideArrowLeft class="w-5 h-5"></svg>
+        </button>
+      } @else {
+        <a routerLink="/panel/eventos/demo" aria-label="Volver al dashboard" class="p-2 -ml-2 text-text hover:text-primary transition-colors cursor-pointer flex items-center justify-center">
+          <svg lucideArrowLeft class="w-5 h-5"></svg>
+        </a>
+      }
+      <h1 class="text-base font-bold tracking-tight text-text">
+        {{ currentStep() === 2 ? 'Cobro' : 'Inscripción presencial' }}
+      </h1>
+    </div>
+
+    <div class="flex items-center gap-2">
+      
+      <button 
+        type="button" 
+        (click)="activeTab.set(activeTab() === 'wizard' ? 'installments' : 'wizard')"
+        class="text-xs font-semibold px-2.5 py-1 rounded-full glass border border-primary/30 text-primary cursor-pointer hover:bg-surface/30">
+        {{ activeTab() === 'wizard' ? 'Ver Cuotas' : 'Paso a Paso' }}
+      </button>
+
+      <button 
+        type="button" 
+        (click)="toggleTheme()" 
+        aria-label="Cambiar tema claro/oscuro"
+        class="p-2 rounded-xl glass border border-border/40 hover:text-primary transition-all text-base cursor-pointer flex items-center justify-center">
+        @if (isDark()) {
+          <svg lucideSun class="w-4 h-4 text-amber-400"></svg>
+        } @else {
+          <svg lucideMoon class="w-4 h-4 text-primary"></svg>
+        }
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-[420px] mx-auto px-4 pt-3 space-y-4">
+
+    @if (activeTab() === 'wizard') {
+
+      <nav aria-label="Progreso de inscripción" class="glass rounded-xl p-2.5 flex items-center justify-between text-xs font-semibold border border-white/20 dark:border-white/10 shadow-sm">
+        <div class="flex items-center gap-1.5" [class.text-primary]="currentStep() === 1" [class.text-muted]="currentStep() !== 1">
+          <span class="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold" [class.bg-primary]="currentStep() === 1" [class.text-on-primary]="currentStep() === 1" [class.bg-surface/40]="currentStep() !== 1">
+            1
+          </span>
+          <span>Datos</span>
+        </div>
+
+        <span class="text-border/60">·</span>
+
+        <div class="flex items-center gap-1.5" [class.text-primary]="currentStep() === 2" [class.text-muted]="currentStep() !== 2">
+          <span class="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold" [class.bg-primary]="currentStep() === 2" [class.text-on-primary]="currentStep() === 2" [class.bg-surface/40]="currentStep() !== 2">
+            2
+          </span>
+          <span>Pago</span>
+        </div>
+
+        <span class="text-border/60">·</span>
+
+        <div class="flex items-center gap-1.5" [class.text-primary]="currentStep() === 3" [class.text-muted]="currentStep() !== 3">
+          <span class="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold" [class.bg-primary]="currentStep() === 3" [class.text-on-primary]="currentStep() === 3" [class.bg-surface/40]="currentStep() !== 3">
+            3
+          </span>
+          <span>Listo</span>
+        </div>
+      </nav>
+
+      @if (formError()) {
+        <div class="p-3 bg-rose-500/15 border border-rose-500/40 text-rose-700 dark:text-rose-300 rounded-xl text-xs font-semibold flex items-center gap-2">
+          <svg lucideAlertCircle class="w-4 h-4 flex-shrink-0 text-rose-500"></svg>
+          <span>{{ formError() }}</span>
+        </div>
+      }
+
+      @if (currentStep() === 1) {
+        <section class="space-y-4">
+          
+          <p class="text-xs text-muted font-medium px-1">
+            {{ eventTitle() }} · <span class="font-bold text-text">{{ basePrice() }} BOB</span> · quedan {{ remainingSpots() }} cupos
+          </p>
+
+          <div class="glass rounded-2xl p-4 border border-white/20 dark:border-white/10 shadow-lg space-y-3.5">
+            <div>
+              <label for="step1-names" class="block text-xs font-bold text-text mb-1">Nombres *</label>
+              <input 
+                id="step1-names"
+                type="text" 
+                [ngModel]="firstName()" 
+                (ngModelChange)="firstName.set($event)"
+                placeholder="Ej. Juan"
+                class="w-full glass border border-control/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl px-3.5 py-2.5 text-sm text-text placeholder:text-muted/60 outline-none transition-all"
+              />
+            </div>
+
+            <div>
+              <label for="step1-lastnames" class="block text-xs font-bold text-text mb-1">Apellidos *</label>
+              <input 
+                id="step1-lastnames"
+                type="text" 
+                [ngModel]="lastName()" 
+                (ngModelChange)="lastName.set($event)"
+                placeholder="Ej. Pérez"
+                class="w-full glass border border-control/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl px-3.5 py-2.5 text-sm text-text placeholder:text-muted/60 outline-none transition-all"
+              />
+            </div>
+
+            <div>
+              <label for="step1-email" class="block text-xs font-bold text-text mb-1">Email *</label>
+              <input 
+                id="step1-email"
+                type="email" 
+                [ngModel]="email()" 
+                (ngModelChange)="email.set($event)"
+                placeholder="Recibirá su código aquí"
+                class="w-full glass border border-control/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl px-3.5 py-2.5 text-sm text-text placeholder:text-muted/60 outline-none transition-all"
+              />
+            </div>
+
+            <div>
+              <label for="step1-phone" class="block text-xs font-bold text-text mb-1">Celular *</label>
+              <div class="relative">
+                <span class="absolute left-3.5 top-2.5 text-sm text-muted font-semibold">+591</span>
+                <input 
+                  id="step1-phone"
+                  type="tel" 
+                  [ngModel]="phone()" 
+                  (ngModelChange)="phone.set($event)"
+                  placeholder="70012345"
+                  class="w-full glass border border-control/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl pl-16 pr-3.5 py-2.5 text-sm text-text placeholder:text-muted/60 outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label for="step1-shirt" class="block text-xs font-bold text-text mb-1">Talla de polera (campo personalizado)</label>
+              <select 
+                id="step1-shirt"
+                [ngModel]="shirtSize()" 
+                (ngModelChange)="shirtSize.set($event)"
+                class="w-full glass border border-control/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl px-3.5 py-2.5 text-sm text-text outline-none transition-all">
+                <option value="S" class="bg-surface text-text">S</option>
+                <option value="M" class="bg-surface text-text">M</option>
+                <option value="L" class="bg-surface text-text">L</option>
+                <option value="XL" class="bg-surface text-text">XL</option>
+                <option value="XXL" class="bg-surface text-text">XXL</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="px-1 text-xs text-muted space-y-1">
+            <p>Los campos salen del formulario del evento (ORG-04).</p>
+            <p class="font-medium text-text">Lee el email en voz alta para confirmarlo: ahí llega su enlace personal.</p>
+          </div>
+
+          <button 
+            type="button" 
+            (click)="goToStep2()"
+            class="w-full bg-primary hover:bg-primary-hover active:scale-[0.98] text-on-primary font-bold py-3.5 px-4 rounded-xl shadow-[0_6px_18px_rgba(11,99,182,0.35)] flex items-center justify-center gap-2 text-base transition-all cursor-pointer">
+            Continuar al pago
+          </button>
+        </section>
+      }
+
+      @if (currentStep() === 2) {
+        <section class="space-y-4">
+          
+          <div class="glass rounded-2xl p-4 border border-white/20 dark:border-white/10 shadow-lg text-center space-y-1">
+            <span class="text-xs uppercase font-bold text-muted block">Total a cobrar</span>
+            <span class="text-3xl font-extrabold text-text tracking-tight num block">
+              {{ paymentMode() === 'full' ? basePrice() : installmentAmount() }} BOB
+            </span>
+            @if (paymentMode() === 'installment') {
+              <span class="text-xs text-amber-700 dark:text-amber-300 font-semibold block">
+                (Cuota inicial de un total de {{ basePrice() }} BOB)
+              </span>
+            }
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs font-semibold">
+            <button 
+              type="button"
+              (click)="paymentMode.set('full')"
+              [class.bg-primary]="paymentMode() === 'full'"
+              [class.text-on-primary]="paymentMode() === 'full'"
+              [class.shadow-md]="paymentMode() === 'full'"
+              [class.text-muted]="paymentMode() !== 'full'"
+              class="p-2.5 glass rounded-xl border border-white/20 transition-all cursor-pointer text-center">
+              Pago total · {{ basePrice() }} BOB
+            </button>
+
+            <button 
+              type="button"
+              (click)="paymentMode.set('installment')"
+              [class.bg-primary]="paymentMode() === 'installment'"
+              [class.text-on-primary]="paymentMode() === 'installment'"
+              [class.shadow-md]="paymentMode() === 'installment'"
+              [class.text-muted]="paymentMode() !== 'installment'"
+              class="p-2.5 glass rounded-xl border border-white/20 transition-all cursor-pointer text-center">
+              Plan en cuotas
+            </button>
+          </div>
+
+          @if (paymentMode() === 'installment') {
+            <div class="glass rounded-2xl p-3.5 border border-amber-500/40 bg-amber-500/10 space-y-2">
+              <label for="step2-installment-now" class="block text-xs font-bold text-text">Monto que paga ahora (BOB) *</label>
+              <input 
+                id="step2-installment-now"
+                type="number"
+                [ngModel]="installmentAmount()" 
+                (ngModelChange)="installmentAmount.set($event)"
+                min="1"
+                [max]="basePrice()"
+                class="w-full glass border border-control/40 focus:border-primary rounded-xl px-3 py-2 text-base font-bold text-text outline-none"
+              />
+              <span class="text-[11px] text-muted block">
+                Resta pendiente: <strong class="text-rose-600 dark:text-rose-400 font-extrabold">{{ basePrice() - installmentAmount() }} BOB</strong>
+              </span>
+            </div>
+          }
+
+          <div class="grid grid-cols-2 p-1 glass rounded-2xl border border-white/20 text-sm font-bold shadow-inner">
+            <button 
+              type="button"
+              (click)="paymentMethod.set('qr')"
+              [class.bg-primary]="paymentMethod() === 'qr'"
+              [class.text-on-primary]="paymentMethod() === 'qr'"
+              [class.shadow-md]="paymentMethod() === 'qr'"
+              [class.text-muted]="paymentMethod() !== 'qr'"
+              class="py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer">
+              <svg lucideQrCode class="w-4 h-4"></svg>
+              <span>QR</span>
+            </button>
+
+            <button 
+              type="button"
+              (click)="paymentMethod.set('cash')"
+              [class.bg-primary]="paymentMethod() === 'cash'"
+              [class.text-on-primary]="paymentMethod() === 'cash'"
+              [class.shadow-md]="paymentMethod() === 'cash'"
+              [class.text-muted]="paymentMethod() !== 'cash'"
+              class="py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer">
+              <svg lucideBanknote class="w-4 h-4"></svg>
+              <span>Efectivo</span>
+            </button>
+          </div>
+
+          @if (paymentMethod() === 'cash') {
+            <div class="glass rounded-2xl p-4 border border-white/20 dark:border-white/10 shadow-lg space-y-3.5">
+              <div>
+                <label for="step2-cash-received" class="block text-xs font-bold text-text mb-1">Efectivo recibido (BOB) *</label>
+                <input 
+                  id="step2-cash-received"
+                  type="number"
+                  [ngModel]="cashReceived()" 
+                  (ngModelChange)="cashReceived.set($event)"
+                  min="0"
+                  class="w-full glass border border-control/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl px-3.5 py-2.5 text-lg font-extrabold text-text num outline-none"
+                />
+              </div>
+
+              <div class="glass p-3.5 rounded-xl border border-border/40 flex items-center justify-between">
+                <span class="text-xs font-bold text-muted uppercase">Vuelto a entregar</span>
+                <span class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 num">
+                  {{ cashChange() }} BOB
+                </span>
+              </div>
+
+              <p class="text-xs text-muted">
+                Se registrará: <strong>{{ paymentMode() === 'full' ? basePrice() : installmentAmount() }} BOB</strong> · efectivo · cobrado por <strong>{{ organizerName() }}</strong>
+              </p>
+            </div>
+
+            <div class="space-y-2 pt-1">
+              <button 
+                type="button" 
+                (click)="confirmPayment()"
+                class="w-full bg-primary hover:bg-primary-hover active:scale-[0.98] text-on-primary font-bold py-3.5 px-4 rounded-xl shadow-[0_6px_18px_rgba(11,99,182,0.35)] flex items-center justify-center gap-2 text-base transition-all cursor-pointer">
+                Confirmar pago en efectivo
+              </button>
+
+              <button 
+                type="button" 
+                (click)="goToStep1()"
+                class="w-full glass hover:bg-surface/40 text-muted font-semibold py-2.5 px-4 rounded-xl text-sm transition-all cursor-pointer">
+                Volver a los datos
+              </button>
+            </div>
+          }
+
+          @if (paymentMethod() === 'qr') {
+            <div class="glass rounded-2xl p-4 border border-white/20 dark:border-white/10 shadow-lg space-y-3.5 text-center">
+              <span class="text-xs font-bold uppercase text-muted block">QR de cobro</span>
+
+              <div class="mx-auto w-48 h-48 bg-white p-3 rounded-2xl shadow-md border border-border/50 flex flex-col items-center justify-center text-slate-900">
+                <svg lucideQrCode class="w-36 h-36"></svg>
+              </div>
+
+              <div class="text-xs text-muted space-y-0.5">
+                <p class="font-bold text-text">Muestra este QR al participante</p>
+                <p>Vence el 30/11/2026</p>
+              </div>
+
+              <div class="pt-2 border-t border-border/40 text-left">
+                <span class="block text-xs font-bold text-muted mb-1.5">Foto de respaldo (Opcional):</span>
+                @if (!voucherPreview()) {
+                  <label for="step2-qr-voucher-file" class="flex items-center justify-center gap-2 border border-dashed border-primary/50 hover:border-primary p-3 rounded-xl glass cursor-pointer text-xs font-semibold text-primary">
+                    <svg lucideCamera class="w-4 h-4"></svg>
+                    <span>Capturar pantalla / Foto</span>
+                    <input 
+                      id="step2-qr-voucher-file"
+                      type="file" 
+                      accept="image/*" 
+                      capture="environment"
+                      (change)="onFileSelected($event, 'initial')"
+                      class="hidden"
+                    />
+                  </label>
+                } @else {
+                  <div class="flex items-center justify-between glass p-2 rounded-xl border border-border/40">
+                    <img [src]="voucherPreview()" alt="Voucher" class="w-12 h-12 object-cover rounded-lg border border-border" />
+                    <button type="button" (click)="removeVoucher('initial')" class="text-rose-500 text-xs font-bold p-1 cursor-pointer flex items-center gap-1">
+                      <svg lucideX class="w-3.5 h-3.5"></svg>
+                      <span>Quitar foto</span>
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="space-y-2 pt-1">
+              <button 
+                type="button" 
+                (click)="confirmPayment()"
+                class="w-full bg-primary hover:bg-primary-hover active:scale-[0.98] text-on-primary font-bold py-3.5 px-4 rounded-xl shadow-[0_6px_18px_rgba(11,99,182,0.35)] flex items-center justify-center gap-2 text-base transition-all cursor-pointer">
+                Confirmar pago recibido
+              </button>
+
+              <button 
+                type="button" 
+                (click)="goToStep1()"
+                class="w-full glass hover:bg-surface/40 text-muted font-semibold py-2.5 px-4 rounded-xl text-sm transition-all cursor-pointer">
+                Volver a los datos
+              </button>
+            </div>
+          }
+        </section>
+      }
+
+      @if (currentStep() === 3 && registeredAttendee()) {
+        <section class="space-y-4 text-center">
+          
+          <div class="glass rounded-2xl p-5 border border-white/20 dark:border-white/10 shadow-xl space-y-4">
+
+            <div class="w-16 h-16 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 flex items-center justify-center shadow-inner">
+              <svg lucideCheck class="w-8 h-8"></svg>
+            </div>
+
+            <h2 class="text-xl font-extrabold text-text">
+              Inscripción registrada
+            </h2>
+
+            <div class="glass p-3.5 rounded-xl border border-border/40 space-y-1">
+              <span class="text-xs uppercase font-bold text-muted block">Código</span>
+              <span class="text-3xl font-extrabold text-primary tracking-wider num block">
+                {{ registeredAttendee()!.code }}
+              </span>
+            </div>
+
+            <div class="space-y-1.5 pt-1 text-sm">
+              <h3 class="font-bold text-text text-base">{{ registeredAttendee()!.fullName }}</h3>
+              <p class="text-xs text-muted">
+                {{ registeredAttendee()!.totalPrice }} BOB · {{ registeredAttendee()!.payments[0]?.method === 'cash' ? 'efectivo' : 'QR' }}
+              </p>
+
+              <div>
+                @if (registeredAttendee()!.status === 'paid') {
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
+                    <span class="w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400"></span>
+                    Aprobado
+                  </span>
+                } @else {
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-500/30">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                    Parcial
+                  </span>
+                }
+              </div>
+            </div>
+
+            <p class="text-xs text-muted pt-1">
+              Enviamos su código y enlace personal a<br />
+              <strong class="text-text font-semibold">{{ registeredAttendee()!.email }}</strong>
+            </p>
+          </div>
+
+          <div class="space-y-2 pt-2">
+            <button 
+              type="button" 
+              (click)="startNewRegistration()"
+              class="w-full bg-primary hover:bg-primary-hover active:scale-[0.98] text-on-primary font-bold py-3.5 px-4 rounded-xl shadow-[0_6px_18px_rgba(11,99,182,0.35)] text-base transition-all cursor-pointer">
+              Nueva inscripción
+            </button>
+
+            <button 
+              type="button" 
+              class="w-full glass hover:bg-surface/40 text-muted font-semibold py-2.5 px-4 rounded-xl text-xs transition-all cursor-not-allowed opacity-80">
+              Mostrar QR de entrada · próximamente
+            </button>
+
+            <a 
+              routerLink="/panel/eventos/demo"
+              class="block w-full text-center text-xs text-muted hover:text-text font-semibold py-2 cursor-pointer">
+              Volver al dashboard
+            </a>
+          </div>
+        </section>
+      }
+
+    } @else {
+
+      <section class="space-y-3">
+        <h2 class="text-xs uppercase font-bold text-muted px-1">Asistentes con cuotas pendientes (V2-03)</h2>
+
+        <div class="relative">
+          <input 
+            type="text" 
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            placeholder="Buscar por Nombre, Código o CI..."
+            class="w-full glass border border-control/40 rounded-xl pl-10 pr-4 py-2.5 text-sm text-text placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-sm"
+          />
+          <svg lucideSearch class="w-4 h-4 text-muted absolute left-3.5 top-3.5"></svg>
+        </div>
+
+        @if (attendeesWithDebt().length === 0) {
+          <div class="text-center py-10 px-4 glass border border-white/20 rounded-2xl flex flex-col items-center">
+            <svg lucideCheck class="w-10 h-10 text-emerald-500 mb-2"></svg>
+            <p class="text-sm font-bold text-text">¡Nadie tiene cuotas pendientes!</p>
+            <p class="text-xs text-muted mt-1">Todos los asistentes registrados están 100% al día.</p>
+          </div>
+        }
+
+        <div class="space-y-2.5">
+          @for (attendee of attendeesWithDebt(); track attendee.id) {
+            <div class="glass border border-white/20 dark:border-white/10 rounded-2xl p-4 flex flex-col gap-2.5 shadow-md">
+              <div class="flex items-start justify-between">
+                <div>
+                  <h3 class="text-sm font-bold text-text">{{ attendee.fullName }}</h3>
+                  <span class="text-xs text-muted">Código: <strong class="text-primary font-mono">{{ attendee.code }}</strong> · Cel: {{ attendee.phone }}</span>
+                </div>
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-400/40 flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                  En Cuotas
+                </span>
+              </div>
+
+              <div class="glass p-2.5 rounded-xl flex items-center justify-between text-xs border border-border/40">
+                <div>
+                  <span class="text-[10px] text-muted block uppercase font-medium">Pagado</span>
+                  <span class="font-bold text-emerald-600 dark:text-emerald-400">Bs {{ store.getAttendeeTotalPaid(attendee) }}</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-[10px] text-muted block uppercase font-medium">Debe todavía</span>
+                  <span class="font-extrabold text-rose-600 dark:text-rose-400 text-sm">Bs {{ store.getAttendeeRemainingDebt(attendee) }}</span>
+                </div>
+              </div>
+
+              <button 
+                type="button"
+                (click)="openInstallmentModal(attendee)"
+                class="w-full bg-amber-500 hover:bg-amber-400 active:scale-[0.98] text-slate-950 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer">
+                Cobrar Siguiente Cuota
+              </button>
+            </div>
+          }
+        </div>
+      </section>
+
+      @if (selectedAttendeeForPayment()) {
+        <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div class="glass-overlay border border-white/20 dark:border-white/10 w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="flex items-center justify-between border-b border-border/40 pb-3">
+              <div>
+                <h3 class="text-sm font-bold text-text">Registrar Abono / Cuota</h3>
+                <p class="text-xs text-primary font-bold">{{ selectedAttendeeForPayment()!.fullName }} ({{ selectedAttendeeForPayment()!.code }})</p>
+              </div>
+              <button (click)="closeInstallmentModal()" aria-label="Cerrar modal" class="text-muted hover:text-text p-1 cursor-pointer">
+                <svg lucideX class="w-4 h-4"></svg>
+              </button>
+            </div>
+
+            <div class="glass p-3 rounded-xl border border-border/40 flex justify-between text-xs">
+              <span class="text-muted">Deuda restante actual:</span>
+              <span class="font-extrabold text-rose-600 dark:text-rose-400">Bs {{ store.getAttendeeRemainingDebt(selectedAttendeeForPayment()!) }}</span>
+            </div>
+
+            <div>
+              <label for="modal-installment-amount" class="block text-xs font-semibold text-text mb-1">Monto que paga hoy (Bs) *</label>
+              <input 
+                id="modal-installment-amount"
+                type="number" 
+                [ngModel]="newInstallmentAmount()" 
+                (ngModelChange)="newInstallmentAmount.set($event)"
+                [max]="store.getAttendeeRemainingDebt(selectedAttendeeForPayment()!)"
+                min="1"
+                class="w-full glass border-2 border-emerald-500/60 rounded-xl px-3.5 py-2.5 text-base font-extrabold text-emerald-600 dark:text-emerald-400 outline-none"
+              />
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button 
+                type="button" 
+                (click)="newInstallmentMethod.set('cash')"
+                [class.bg-emerald-500/20]="newInstallmentMethod() === 'cash'"
+                [class.border-2]="newInstallmentMethod() === 'cash'"
+                [class.border-emerald-500]="newInstallmentMethod() === 'cash'"
+                class="p-2.5 rounded-xl font-bold text-xs cursor-pointer glass flex items-center justify-center gap-1.5">
+                <svg lucideBanknote class="w-4 h-4"></svg>
+                <span>Efectivo</span>
+              </button>
+
+              <button 
+                type="button" 
+                (click)="newInstallmentMethod.set('qr')"
+                [class.bg-primary/20]="newInstallmentMethod() === 'qr'"
+                [class.border-2]="newInstallmentMethod() === 'qr'"
+                [class.border-primary]="newInstallmentMethod() === 'qr'"
+                class="p-2.5 rounded-xl font-bold text-xs cursor-pointer glass flex items-center justify-center gap-1.5">
+                <svg lucideQrCode class="w-4 h-4"></svg>
+                <span>QR Bancario</span>
+              </button>
+            </div>
+
+            <div class="pt-2 flex gap-2">
+              <button type="button" (click)="closeInstallmentModal()" class="w-1/3 glass text-muted py-3 rounded-xl text-xs font-semibold cursor-pointer">
+                Cancelar
+              </button>
+              <button type="button" (click)="submitInstallment()" class="w-2/3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-xs shadow-lg shadow-emerald-600/30 cursor-pointer">
+                Confirmar Abono
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+    }
+
+  </main>
+</div>

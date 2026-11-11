@@ -14,6 +14,21 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'auth',
+    loadChildren: () =>
+      import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
+  },
+  {
+    path: 'login',
+    redirectTo: 'auth/login',
+    pathMatch: 'full',
+  },
+  {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: 'panel/eventos',
+  },
+  {
     path: '',
     loadChildren: () =>
       import('./features/public/public.routes').then((m) => m.PUBLIC_ROUTES),
@@ -24,11 +39,6 @@ export const routes: Routes = [
       import('./features/participant/participant.routes').then(
         (m) => m.PARTICIPANT_ROUTES,
       ),
-  },
-  {
-    path: '',
-    loadChildren: () =>
-      import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
   },
   {
     path: '**',

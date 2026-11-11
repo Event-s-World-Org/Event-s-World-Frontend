@@ -15,11 +15,6 @@ export class RuntimeConfigService {
   readonly supabase = computed(() => this.configState().supabase);
   readonly flags = computed(() => this.configState().featureFlags);
 
-  /**
-   * Carga la configuración desde /config.json en tiempo de ejecución.
-   * Permite cambiar feature flags y URLs sin necesidad de recompilar la aplicación.
-   * Es completamente SSR-safe: en servidor retorna los valores por defecto sin tocar window/localStorage.
-   */
   async loadConfig(): Promise<AppConfig> {
     if (this.isLoaded) {
       return this.configState();
@@ -57,16 +52,10 @@ export class RuntimeConfigService {
     return this.configState();
   }
 
-  /**
-   * Evalúa si una funcionalidad está activa.
-   */
   isEnabled(flagKey: keyof FeatureFlags | string): boolean {
     return Boolean(this.flags()[flagKey as keyof FeatureFlags] ?? false);
   }
 
-  /**
-   * Modifica una bandera en caliente (útil para pruebas de QA o demostraciones en vivo).
-   */
   setFlag(flagKey: string, value: boolean): void {
     this.configState.update((current) => ({
       ...current,

@@ -1,0 +1,726 @@
+<div class="min-h-screen text-text pb-24 font-sans">
+
+  <header class="sticky top-0 z-20 glass border-b border-white/20 dark:border-white/10 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <a routerLink="/panel/eventos" aria-label="Volver a mis eventos" class="p-2 -ml-2 text-text hover:text-primary transition-colors cursor-pointer flex items-center justify-center">
+        <svg lucideChevronLeft class="w-5 h-5"></svg>
+      </a>
+      <div>
+        <h1 class="text-base font-bold leading-tight text-text">Crear nuevo evento</h1>
+        <p class="text-xs text-muted">Configura tu evento paso a paso</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-[560px] mx-auto px-4 pt-4 space-y-4">
+
+    <nav class="glass rounded-2xl p-2.5 flex items-center justify-between text-xs font-semibold border border-white/20 dark:border-white/10 shadow-sm">
+      <div class="flex items-center gap-1.5" [class.text-primary]="step() === 1" [class.text-muted]="step() !== 1">
+        <span class="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold" [class.bg-primary]="step() === 1" [class.text-on-primary]="step() === 1" [class.bg-surface/40]="step() !== 1">
+          1
+        </span>
+        <span>Datos</span>
+      </div>
+
+      <span class="text-border/60">·</span>
+
+      <div class="flex items-center gap-1.5" [class.text-primary]="step() === 2" [class.text-muted]="step() !== 2">
+        <span class="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold" [class.bg-primary]="step() === 2" [class.text-on-primary]="step() === 2" [class.bg-surface/40]="step() !== 2">
+          2
+        </span>
+        <span>Precio y pagos</span>
+      </div>
+
+      <span class="text-border/60">·</span>
+
+      <div class="flex items-center gap-1.5" [class.text-primary]="step() === 3" [class.text-muted]="step() !== 3">
+        <span class="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold" [class.bg-primary]="step() === 3" [class.text-on-primary]="step() === 3" [class.bg-surface/40]="step() !== 3">
+          3
+        </span>
+        <span>Formulario</span>
+      </div>
+    </nav>
+
+    @if (errorMessage()) {
+      <div class="p-3 bg-rose-500/15 border border-rose-500/40 text-rose-700 dark:text-rose-300 rounded-xl text-xs font-semibold flex items-center gap-2">
+        <svg lucideAlertCircle class="w-4 h-4 text-rose-500 flex-shrink-0"></svg>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    @if (step() === 1) {
+      <section class="glass rounded-3xl p-5 border border-white/20 dark:border-white/10 shadow-xl space-y-4">
+        <h2 class="text-sm font-extrabold text-text uppercase tracking-wider flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-primary"></span>
+          1. Datos principales del evento
+        </h2>
+
+        <div>
+          <label for="event-title" class="block text-xs font-bold text-text mb-1">Título del evento *</label>
+          <input 
+            id="event-title"
+            type="text" 
+            [ngModel]="title()" 
+            (ngModelChange)="title.set($event)"
+            placeholder="Ej. Electric Neon Fest 2026"
+            class="w-full glass border border-control/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl px-3.5 py-2.5 text-sm text-text placeholder:text-muted/60 outline-none"
+          />
+        </div>
+
+        <div>
+          <label for="event-description" class="block text-xs font-bold text-text mb-1">Descripción *</label>
+          <textarea 
+            id="event-description"
+            rows="3"
+            [ngModel]="description()" 
+            (ngModelChange)="description.set($event)"
+            placeholder="Describe tu evento para los asistentes..."
+            class="w-full glass border border-control/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl px-3.5 py-2 text-sm text-text placeholder:text-muted/60 outline-none"></textarea>
+        </div>
+
+        <div>
+          <label for="cover-file-input" class="block text-xs font-bold text-text mb-1">Portada del evento (16:9)</label>
+          @if (!coverPreview()) {
+            <label for="cover-file-input" class="flex flex-col items-center justify-center border-2 border-dashed border-primary/40 hover:border-primary p-5 rounded-2xl glass cursor-pointer text-center">
+              <svg lucideImage class="w-8 h-8 mb-1 text-primary"></svg>
+              <span class="text-xs font-bold text-primary">Subir imagen 16:9</span>
+              <span class="text-[10px] text-muted mt-0.5">JPG o PNG · máx. 5 MB</span>
+              <input 
+                id="cover-file-input"
+                type="file" 
+                accept="image/*" 
+                (change)="onCoverSelected($event)" 
+                class="hidden" 
+              />
+            </label>
+          } @else {
+            <div class="relative rounded-2xl overflow-hidden border border-border/50 glass">
+              <img [src]="coverPreview()" alt="Portada" class="w-full h-36 object-cover" />
+              <button 
+                type="button" 
+                aria-label="Eliminar portada"
+                (click)="coverPreview.set(null)" 
+                class="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white hover:bg-black text-xs cursor-pointer flex items-center justify-center">
+                <svg lucideX class="w-3.5 h-3.5"></svg>
+              </button>
+            </div>
+          }
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="event-category" class="block text-xs font-bold text-text mb-1">Categoría *</label>
+            <select 
+              id="event-category"
+              [ngModel]="category()" 
+              (ngModelChange)="category.set($event)"
+              class="w-full glass border border-control/40 focus:border-primary rounded-xl px-3 py-2 text-xs text-text outline-none">
+              <option value="Festival y música" class="bg-surface text-text">Festival y música</option>
+              <option value="Deporte" class="bg-surface text-text">Deporte y carreras</option>
+              <option value="Conferencia" class="bg-surface text-text">Conferencia y talleres</option>
+              <option value="Salud y bienestar" class="bg-surface text-text">Salud y bienestar</option>
+              <option value="Comunidad" class="bg-surface text-text">Comunidad y cultura</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="event-city" class="block text-xs font-bold text-text mb-1">Ciudad *</label>
+            <select 
+              id="event-city"
+              [ngModel]="city()" 
+              (ngModelChange)="city.set($event)"
+              class="w-full glass border border-control/40 focus:border-primary rounded-xl px-3 py-2 text-xs text-text outline-none">
+              <option value="La Paz" class="bg-surface text-text">La Paz</option>
+              <option value="Cochabamba" class="bg-surface text-text">Cochabamba</option>
+              <option value="Santa Cruz" class="bg-surface text-text">Santa Cruz</option>
+              <option value="Oruro" class="bg-surface text-text">Oruro</option>
+              <option value="Potosí" class="bg-surface text-text">Potosí</option>
+              <option value="Sucre" class="bg-surface text-text">Sucre</option>
+              <option value="Tarija" class="bg-surface text-text">Tarija</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="event-start-date" class="block text-xs font-bold text-text mb-1">Inicio *</label>
+            <input 
+              id="event-start-date"
+              type="datetime-local" 
+              [ngModel]="startDate()" 
+              (ngModelChange)="startDate.set($event)"
+              class="w-full glass border border-control/40 focus:border-primary rounded-xl px-3 py-2 text-xs text-text outline-none"
+            />
+          </div>
+
+          <div>
+            <label for="event-end-date" class="block text-xs font-bold text-text mb-1">Fin *</label>
+            <input 
+              id="event-end-date"
+              type="datetime-local" 
+              [ngModel]="endDate()" 
+              (ngModelChange)="endDate.set($event)"
+              class="w-full glass border border-control/40 focus:border-primary rounded-xl px-3 py-2 text-xs text-text outline-none"
+            />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="event-location" class="block text-xs font-bold text-text mb-1">Lugar del evento *</label>
+            <input 
+              id="event-location"
+              type="text" 
+              [ngModel]="location()" 
+              (ngModelChange)="location.set($event)"
+              placeholder="Ej. Arena Central"
+              class="w-full glass border border-control/40 focus:border-primary rounded-xl px-3 py-2 text-xs text-text outline-none"
+            />
+          </div>
+
+          <div>
+            <label for="event-capacity" class="block text-xs font-bold text-text mb-1">Cupo máximo *</label>
+            <input 
+              id="event-capacity"
+              type="number" 
+              [ngModel]="capacityMax()" 
+              (ngModelChange)="capacityMax.set($event)"
+              min="1"
+              class="w-full glass border border-control/40 focus:border-primary rounded-xl px-3 py-2 text-xs text-text outline-none"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label for="event-contact" class="block text-xs font-bold text-text mb-1">Contacto público del organizador *</label>
+          <input 
+            id="event-contact"
+            type="text" 
+            [ngModel]="contactInfo()" 
+            (ngModelChange)="contactInfo.set($event)"
+            placeholder="WhatsApp o email visible"
+            class="w-full glass border border-control/40 focus:border-primary rounded-xl px-3 py-2 text-xs text-text outline-none"
+          />
+        </div>
+
+        <button 
+          type="button" 
+          (click)="nextStep()" 
+          class="w-full bg-primary hover:bg-primary-hover active:scale-[0.98] text-on-primary font-bold py-3 px-4 rounded-xl shadow-[0_6px_18px_rgba(11,99,182,0.35)] flex items-center justify-center gap-2 text-sm transition-all cursor-pointer">
+          <span>Siguiente: Precio y pagos</span>
+          <svg lucideArrowRight class="w-4 h-4"></svg>
+        </button>
+      </section>
+    }
+
+    @if (step() === 2) {
+      <section class="glass rounded-3xl p-5 border border-white/20 dark:border-white/10 shadow-xl space-y-4">
+        <h2 class="text-sm font-extrabold text-text uppercase tracking-wider flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-primary"></span>
+          2. Precio por entrada y QR de cobro
+        </h2>
+
+        <label for="toggle-free-event" class="flex items-center gap-2.5 p-3 glass rounded-xl border border-border/40 cursor-pointer">
+          <input 
+            id="toggle-free-event"
+            type="checkbox" 
+            [ngModel]="isFree()" 
+            (ngModelChange)="isFree.set($event)"
+            class="w-4 h-4 rounded text-primary"
+          />
+          <span class="text-xs font-bold text-text">Evento gratuito (oculta cobros y QR)</span>
+        </label>
+
+        @if (!isFree()) {
+          
+          <div class="space-y-1.5">
+            <span class="text-xs font-bold text-text block">Estructura de precios *</span>
+            <div class="grid grid-cols-2 gap-2">
+              <button 
+                type="button" 
+                (click)="pricingMode.set('single')"
+                [class.bg-primary]="pricingMode() === 'single'"
+                [class.text-on-primary]="pricingMode() === 'single'"
+                [class.shadow-md]="pricingMode() === 'single'"
+                [class.text-muted]="pricingMode() !== 'single'"
+                class="glass p-2.5 rounded-xl border border-border/40 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                <svg lucideTag class="w-3.5 h-3.5"></svg>
+                <span>Precio fijo único</span>
+              </button>
+
+              <button 
+                type="button" 
+                (click)="pricingMode.set('phases')"
+                [class.bg-primary]="pricingMode() === 'phases'"
+                [class.text-on-primary]="pricingMode() === 'phases'"
+                [class.shadow-md]="pricingMode() === 'phases'"
+                [class.text-muted]="pricingMode() !== 'phases'"
+                class="glass p-2.5 rounded-xl border border-border/40 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                <svg lucideCalendarClock class="w-3.5 h-3.5"></svg>
+                <span>Fases por fechas (Preventas)</span>
+              </button>
+            </div>
+          </div>
+
+          @if (pricingMode() === 'single') {
+            <div class="grid grid-cols-2 gap-3 p-3 rounded-2xl glass border border-border/40">
+              <div>
+                <label for="event-price-input" class="block text-xs font-bold text-text mb-1">Precio por entrada *</label>
+                <input 
+                  id="event-price-input"
+                  type="number" 
+                  [ngModel]="price()" 
+                  (ngModelChange)="price.set($event); qrAmount.set($event)"
+                  min="0"
+                  class="w-full glass border border-control/40 focus:border-primary rounded-xl px-3.5 py-2 text-base font-extrabold text-text outline-none"
+                />
+              </div>
+
+              <div>
+                <label for="event-currency-select" class="block text-xs font-bold text-text mb-1">Moneda *</label>
+                <select 
+                  id="event-currency-select"
+                  [ngModel]="currency()" 
+                  (ngModelChange)="currency.set($event)"
+                  class="w-full glass border border-control/40 rounded-xl px-3 py-2 text-sm font-bold text-text outline-none">
+                  <option value="BOB" class="bg-surface text-text">BOB (Bolivianos)</option>
+                </select>
+              </div>
+            </div>
+          }
+
+          @if (pricingMode() === 'phases') {
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-xs font-bold text-text block">Fases de venta / Preventas</span>
+                  <p class="text-[11px] text-muted">El precio cambiará de forma automática según la fecha de inscripción</p>
+                </div>
+                <button 
+                  type="button" 
+                  (click)="addPhase()"
+                  class="text-xs font-bold text-primary hover:text-primary-hover flex items-center gap-1 cursor-pointer p-1">
+                  <svg lucidePlus class="w-3.5 h-3.5"></svg>
+                  <span>Agregar fase</span>
+                </button>
+              </div>
+
+              <div class="space-y-3">
+                @for (ph of phases(); track ph.id; let idx = $index) {
+                  <div class="glass p-3.5 rounded-2xl border border-white/20 dark:border-white/10 shadow-sm space-y-3 relative">
+                    
+                    <div class="flex items-center justify-between gap-2 pb-2 border-b border-border/30">
+                      <div class="flex items-center gap-2">
+                        <span class="w-5 h-5 rounded-full bg-primary/20 text-primary text-xs font-extrabold flex items-center justify-center">
+                          {{ idx + 1 }}
+                        </span>
+                        <input 
+                          type="text" 
+                          [ngModel]="ph.name" 
+                          (ngModelChange)="updatePhaseName(idx, $event)"
+                          placeholder="Ej. Fase 1: Preventa Inicial"
+                          class="glass border-b border-border/60 focus:border-primary font-bold text-xs text-text px-2 py-0.5 outline-none rounded"
+                        />
+                      </div>
+
+                      <div class="flex items-center gap-2">
+                        
+                        @if (getPhaseStatus(ph) === 'active') {
+                          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
+                            ● Vigente hoy
+                          </span>
+                        } @else if (getPhaseStatus(ph) === 'upcoming') {
+                          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border border-blue-500/30">
+                            Próxima
+                          </span>
+                        } @else {
+                          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                            Finalizada
+                          </span>
+                        }
+
+                        @if (phases().length > 1) {
+                          <button 
+                            type="button" 
+                            aria-label="Eliminar fase"
+                            (click)="removePhase(idx)" 
+                            class="text-rose-500 hover:text-rose-600 p-1 cursor-pointer">
+                            <svg lucideX class="w-3.5 h-3.5"></svg>
+                          </button>
+                        }
+                      </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                      <div>
+                        <label [for]="'phase-price-' + idx" class="block text-[11px] font-bold text-text mb-1">Precio (BOB) *</label>
+                        <input 
+                          [id]="'phase-price-' + idx"
+                          type="number" 
+                          [ngModel]="ph.price" 
+                          (ngModelChange)="updatePhasePrice(idx, $event)"
+                          min="0"
+                          class="w-full glass border border-control/40 focus:border-primary rounded-xl px-3 py-1.5 text-sm font-extrabold text-text outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label [for]="'phase-start-' + idx" class="block text-[11px] font-bold text-text mb-1">Desde fecha *</label>
+                        <input 
+                          [id]="'phase-start-' + idx"
+                          type="date" 
+                          [ngModel]="ph.startDate" 
+                          (ngModelChange)="updatePhaseStartDate(idx, $event)"
+                          class="w-full glass border border-control/40 focus:border-primary rounded-xl px-2.5 py-1.5 text-xs text-text outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label [for]="'phase-end-' + idx" class="block text-[11px] font-bold text-text mb-1">Hasta fecha *</label>
+                        <input 
+                          [id]="'phase-end-' + idx"
+                          type="date" 
+                          [ngModel]="ph.endDate" 
+                          (ngModelChange)="updatePhaseEndDate(idx, $event)"
+                          class="w-full glass border border-control/40 focus:border-primary rounded-xl px-2.5 py-1.5 text-xs text-text outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs pt-1">
+                      <label [for]="'phase-spots-' + idx" class="text-[11px] text-muted cursor-pointer">Cupo límite de esta fase (opcional):</label>
+                      <div class="flex items-center gap-1.5">
+                        <input 
+                          [id]="'phase-spots-' + idx"
+                          type="number" 
+                          [ngModel]="ph.limitSpots" 
+                          (ngModelChange)="updatePhaseLimitSpots(idx, $event)"
+                          placeholder="Sin límite"
+                          min="1"
+                          class="w-24 glass border border-control/40 focus:border-primary rounded-lg px-2 py-1 text-xs text-text outline-none"
+                        />
+                        <span class="text-[10px] text-muted">cupos</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <div class="glass p-3 rounded-xl border border-primary/30 bg-primary/10 text-xs flex items-center gap-2">
+                <svg lucideLayers class="w-4 h-4 text-primary flex-shrink-0"></svg>
+                <span class="text-text">
+                  Precio vigente hoy: <strong class="text-primary">{{ effectivePrice() }} BOB</strong>
+                  @if (activePhase()) {
+                    ({{ activePhase()?.name }})
+                  }
+                </span>
+              </div>
+            </div>
+          }
+
+          <div class="space-y-2 pt-2 border-t border-border/40">
+            <span class="block text-xs font-bold text-text">QR Bancario de cobro *</span>
+
+            @if (!qrPreview()) {
+              <label for="qr-file-input" class="flex flex-col items-center justify-center border-2 border-dashed border-primary/40 hover:border-primary p-5 rounded-2xl glass cursor-pointer text-center">
+                <svg lucideQrCode class="w-8 h-8 mb-1 text-primary"></svg>
+                <span class="text-xs font-bold text-primary">Subir imagen del QR de tu banco</span>
+                <span class="text-[10px] text-muted mt-0.5">Los participantes escanearán este QR</span>
+                <input 
+                  id="qr-file-input"
+                  type="file" 
+                  accept="image/*" 
+                  (change)="onQrSelected($event)" 
+                  class="hidden" 
+                />
+              </label>
+            } @else {
+              <div class="relative glass rounded-2xl p-3 border border-border/40 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <img [src]="qrPreview()" alt="QR" class="w-16 h-16 object-contain rounded-lg border border-border" />
+                  <div>
+                    <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 block">QR subido</span>
+                    <span class="text-[10px] text-muted">Vence el {{ qrExpiresAt() }}</span>
+                  </div>
+                </div>
+                <button 
+                  type="button" 
+                  (click)="qrPreview.set(null)" 
+                  class="text-xs text-rose-500 font-bold p-1 cursor-pointer">
+                  Cambiar QR
+                </button>
+              </div>
+            }
+
+            <div class="grid grid-cols-2 gap-3 pt-1">
+              <div>
+                <label for="event-qr-amount" class="block text-xs font-bold text-text mb-1">Monto en QR (BOB) *</label>
+                <input 
+                  id="event-qr-amount"
+                  type="number" 
+                  [ngModel]="qrAmount()" 
+                  (ngModelChange)="qrAmount.set($event)"
+                  class="w-full glass border border-control/40 focus:border-primary rounded-xl px-3 py-2 text-xs font-bold text-text outline-none"
+                />
+              </div>
+
+              <div>
+                <label for="event-qr-expiry" class="block text-xs font-bold text-text mb-1">Vence el *</label>
+                <input 
+                  id="event-qr-expiry"
+                  type="date" 
+                  [ngModel]="qrExpiresAt()" 
+                  (ngModelChange)="qrExpiresAt.set($event)"
+                  class="w-full glass border border-control/40 focus:border-primary rounded-xl px-3 py-2 text-xs text-text outline-none"
+                />
+              </div>
+            </div>
+          </div>
+        }
+
+        <div class="flex gap-2 pt-2">
+          <button 
+            type="button" 
+            (click)="prevStep()" 
+            class="w-1/3 glass hover:bg-surface/40 text-muted font-bold py-3 px-4 rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5">
+            <svg lucideArrowLeft class="w-4 h-4"></svg>
+            <span>Atrás</span>
+          </button>
+          <button 
+            type="button" 
+            (click)="nextStep()" 
+            class="w-2/3 bg-primary hover:bg-primary-hover active:scale-[0.98] text-on-primary font-bold py-3 px-4 rounded-xl shadow-[0_6px_18px_rgba(11,99,182,0.35)] text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5">
+            <span>Siguiente: Formulario</span>
+            <svg lucideArrowRight class="w-4 h-4"></svg>
+          </button>
+        </div>
+      </section>
+    }
+
+    @if (step() === 3) {
+      <section class="glass rounded-3xl p-5 border border-white/20 dark:border-white/10 shadow-xl space-y-4">
+        <h2 class="text-sm font-extrabold text-text uppercase tracking-wider flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-primary"></span>
+          3. Campos del formulario de inscripción
+        </h2>
+
+        <p class="text-xs text-muted">
+          Define qué datos deben completar los asistentes al momento de registrarse en tu evento:
+        </p>
+
+        <div class="space-y-2">
+          @for (f of customFields(); track $index) {
+            <div 
+              draggable="true"
+              (dragstart)="onDragStart($index)"
+              (dragover)="onDragOver($event)"
+              (drop)="onDrop($index)"
+              (dragend)="onDragEnd()"
+              [class.opacity-50]="draggedIndex() === $index"
+              [class.border-primary]="draggedIndex() === $index"
+              class="glass p-3 rounded-2xl border border-border/40 shadow-sm transition-all">
+
+              @if (editingIndex() === $index) {
+                
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between pb-2 border-b border-border/30">
+                    <span class="text-xs font-bold text-primary flex items-center gap-1.5">
+                      <svg lucidePencil class="w-3.5 h-3.5"></svg>
+                      <span>Editar campo {{ $index + 1 }}</span>
+                    </span>
+                    <button 
+                      type="button" 
+                      aria-label="Cerrar edición"
+                      (click)="cancelEdit()" 
+                      class="text-muted hover:text-text p-1 cursor-pointer">
+                      <svg lucideX class="w-3.5 h-3.5"></svg>
+                    </button>
+                  </div>
+
+                  <div class="space-y-2">
+                    <div>
+                      <label [for]="'edit-label-' + $index" class="block text-[11px] font-bold text-text mb-1">Nombre del campo *</label>
+                      <input 
+                        [id]="'edit-label-' + $index"
+                        type="text" 
+                        [ngModel]="editLabel()" 
+                        (ngModelChange)="editLabel.set($event)"
+                        class="w-full glass border border-control/40 focus:border-primary rounded-xl px-3 py-2 text-xs text-text outline-none"
+                      />
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                      <div>
+                        <label [for]="'edit-type-' + $index" class="block text-[11px] font-bold text-text mb-1">Tipo de dato</label>
+                        <select 
+                          [id]="'edit-type-' + $index"
+                          [ngModel]="editType()" 
+                          (ngModelChange)="editType.set($event)"
+                          class="w-full glass border border-control/40 rounded-xl px-2.5 py-1.5 text-xs text-text outline-none">
+                          <option value="text" class="bg-surface text-text">Texto libre</option>
+                          <option value="email" class="bg-surface text-text">Correo electrónico</option>
+                          <option value="tel" class="bg-surface text-text">Teléfono / WhatsApp</option>
+                          <option value="number" class="bg-surface text-text">Número</option>
+                          <option value="select" class="bg-surface text-text">Selección (desplegable)</option>
+                          <option value="date" class="bg-surface text-text">Fecha</option>
+                        </select>
+                      </div>
+
+                      <div class="flex items-end pb-1.5">
+                        <label [for]="'edit-req-' + $index" class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-text">
+                          <input 
+                            [id]="'edit-req-' + $index"
+                            type="checkbox" 
+                            [ngModel]="editRequired()" 
+                            (ngModelChange)="editRequired.set($event)"
+                            class="w-4 h-4 rounded text-primary"
+                          />
+                          <span>Obligatorio</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex justify-end gap-2 pt-1 border-t border-border/30">
+                    <button 
+                      type="button" 
+                      (click)="cancelEdit()" 
+                      class="px-3 py-1.5 rounded-xl glass hover:bg-surface/40 text-muted font-bold text-xs cursor-pointer">
+                      Cancelar
+                    </button>
+                    <button 
+                      type="button" 
+                      (click)="saveEdit()" 
+                      class="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-on-primary font-bold text-xs cursor-pointer flex items-center gap-1.5 shadow-sm">
+                      <svg lucideCheck class="w-3.5 h-3.5"></svg>
+                      <span>Guardar</span>
+                    </button>
+                  </div>
+                </div>
+              } @else {
+                
+                <div class="flex items-center justify-between text-xs gap-2">
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    
+                    <div class="flex items-center gap-1">
+                      <span class="text-muted/60 cursor-grab active:cursor-grabbing p-1 hover:text-text" title="Arrastra para reordenar">
+                        <svg lucideGripVertical class="w-4 h-4"></svg>
+                      </span>
+                      <div class="flex flex-col">
+                        <button 
+                          type="button" 
+                          aria-label="Mover arriba"
+                          [disabled]="$index === 0"
+                          (click)="moveFieldUp($index)" 
+                          class="p-0.5 rounded text-muted hover:text-primary disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer">
+                          <svg lucideChevronUp class="w-3.5 h-3.5"></svg>
+                        </button>
+                        <button 
+                          type="button" 
+                          aria-label="Mover abajo"
+                          [disabled]="$index === customFields().length - 1"
+                          (click)="moveFieldDown($index)" 
+                          class="p-0.5 rounded text-muted hover:text-primary disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer">
+                          <svg lucideChevronDown class="w-3.5 h-3.5"></svg>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="min-w-0">
+                      <span class="font-bold text-text block truncate">{{ f.label }}</span>
+                      <span class="text-[10px] text-muted flex items-center gap-1.5">
+                        <span class="uppercase tracking-wider font-semibold">{{ f.type }}</span>
+                        <span>·</span>
+                        <span [class.text-emerald-600]="f.required" [class.dark:text-emerald-400]="f.required">
+                          {{ f.required ? 'Obligatorio' : 'Opcional' }}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-1 flex-shrink-0">
+                    <button 
+                      type="button" 
+                      aria-label="Editar campo"
+                      (click)="startEdit($index)" 
+                      class="p-1.5 rounded-lg text-primary hover:bg-primary/10 transition-colors cursor-pointer flex items-center gap-1 font-semibold text-xs">
+                      <svg lucidePencil class="w-3.5 h-3.5"></svg>
+                      <span class="hidden sm:inline">Editar</span>
+                    </button>
+
+                    <button 
+                      type="button" 
+                      aria-label="Eliminar campo"
+                      (click)="removeField($index)" 
+                      class="p-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer flex items-center justify-center">
+                      <svg lucideX class="w-3.5 h-3.5"></svg>
+                    </button>
+                  </div>
+                </div>
+              }
+
+            </div>
+          }
+        </div>
+
+        <div class="glass p-3 rounded-2xl border border-dashed border-border/60 space-y-2">
+          <span class="text-xs font-bold text-text flex items-center gap-1.5">
+            <svg lucidePlus class="w-3.5 h-3.5 text-primary"></svg>
+            <span>Agregar campo adicional</span>
+          </span>
+          <div class="grid grid-cols-2 gap-2">
+            <input 
+              type="text" 
+              [ngModel]="newFieldLabel()" 
+              (ngModelChange)="newFieldLabel.set($event)"
+              placeholder="Ej. Institución / Carrera"
+              class="glass border border-control/40 rounded-xl px-3 py-1.5 text-xs text-text outline-none"
+            />
+            <button 
+              type="button" 
+              (click)="addCustomField()" 
+              class="bg-primary hover:bg-primary-hover text-on-primary font-bold px-3 py-1.5 rounded-xl text-xs cursor-pointer flex items-center justify-center gap-1">
+              <svg lucidePlus class="w-3.5 h-3.5"></svg>
+              <span>Añadir</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="glass p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-xs text-muted space-y-1">
+          <p><strong class="text-text">Todo listo para lanzar:</strong> {{ title() }}</p>
+          <p>
+            Precio: 
+            <strong class="text-text">
+              @if (isFree()) {
+                Gratis
+              } @else if (pricingMode() === 'phases') {
+                {{ effectivePrice() }} BOB ({{ activePhase()?.name || 'Fase 1' }})
+              } @else {
+                {{ price() }} BOB
+              }
+            </strong> 
+            · Lugar: <strong>{{ location() }}</strong>
+          </p>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button 
+            type="button" 
+            (click)="prevStep()" 
+            class="w-1/3 glass hover:bg-surface/40 text-muted font-bold py-3 px-4 rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5">
+            <svg lucideArrowLeft class="w-4 h-4"></svg>
+            <span>Atrás</span>
+          </button>
+          <button 
+            type="button" 
+            (click)="publishEvent()" 
+            class="w-2/3 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-extrabold py-3.5 px-4 rounded-xl shadow-lg shadow-emerald-600/30 text-sm transition-all cursor-pointer flex items-center justify-center gap-2">
+            <svg lucideSparkles class="w-4 h-4"></svg>
+            <span>Publicar Evento</span>
+          </button>
+        </div>
+      </section>
+    }
+
+  </main>
+</div>

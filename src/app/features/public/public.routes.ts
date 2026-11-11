@@ -1,16 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Routes } from '@angular/router';
-
-@Component({
-  selector: 'app-explore-events-page',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <main class="p-6">
-      <h1 i18n="@@public.explore.title" class="text-2xl font-bold">Explorar eventos</h1>
-    </main>
-  `,
-})
-export class ExploreEventsPage {}
+import { ExploreEventsPage } from './pages/explore-events.page';
 
 @Component({
   selector: 'app-event-detail-page',

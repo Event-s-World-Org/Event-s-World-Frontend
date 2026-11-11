@@ -1,0 +1,120 @@
+<div class="min-h-screen text-text font-sans flex flex-col justify-center items-center px-4 py-8">
+  <div class="w-full max-w-[420px] space-y-6">
+    
+    <div class="text-center space-y-2">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary to-accent text-on-primary font-black text-xl shadow-[0_8px_24px_rgba(11,99,182,0.4)]">
+        EW
+      </div>
+      <h1 class="text-2xl font-black tracking-tight text-text">
+        Event's World
+      </h1>
+      <p class="text-xs text-muted font-medium">
+        Ingreso exclusivo para Organizadores y Staff
+      </p>
+    </div>
+
+    <div class="glass rounded-3xl p-6 sm:p-7 border border-white/20 dark:border-white/10 shadow-2xl space-y-5">
+      
+      <div class="pb-2 border-b border-border/30 flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
+          <svg lucideLock class="w-3.5 h-3.5"></svg>
+          <span>Acceso de Usuario</span>
+        </span>
+        <span class="text-[10px] text-muted font-semibold bg-surface/50 px-2 py-0.5 rounded-full border border-border/40">
+          Beta Móvil
+        </span>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="p-3 bg-rose-500/15 border border-rose-500/40 text-rose-700 dark:text-rose-300 rounded-xl text-xs font-semibold flex items-center gap-2">
+          <svg lucideAlertCircle class="w-4 h-4 flex-shrink-0 text-rose-500"></svg>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <form (ngSubmit)="onSubmit()" class="space-y-4">
+        
+        <div>
+          <label for="login-username" class="block text-xs font-bold text-text mb-1.5">Usuario de Organizador *</label>
+          <div class="relative">
+            <input 
+              id="login-username"
+              type="text" 
+              [ngModel]="username()" 
+              (ngModelChange)="username.set($event)"
+              name="username"
+              placeholder="Ej. Shadith"
+              autocomplete="username"
+              class="w-full glass border border-control/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl pl-10 pr-3.5 py-2.5 text-sm font-semibold text-text placeholder:text-muted/60 outline-none transition-all"
+            />
+            <svg lucideUser class="w-4 h-4 text-muted absolute left-3.5 top-3"></svg>
+          </div>
+        </div>
+
+        <div>
+          <label for="login-password" class="block text-xs font-bold text-text mb-1.5">Contraseña *</label>
+          <div class="relative">
+            <input 
+              id="login-password"
+              [type]="showPassword() ? 'text' : 'password'" 
+              [ngModel]="password()" 
+              (ngModelChange)="password.set($event)"
+              name="password"
+              placeholder="Introduce tu contraseña"
+              autocomplete="current-password"
+              class="w-full glass border border-control/40 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl pl-10 pr-10 py-2.5 text-sm font-semibold text-text placeholder:text-muted/60 outline-none transition-all"
+            />
+            <svg lucideLock class="w-4 h-4 text-muted absolute left-3.5 top-3"></svg>
+            
+            <button 
+              type="button" 
+              aria-label="Mostrar u ocultar contraseña"
+              (click)="togglePasswordVisibility()" 
+              class="p-1 text-muted hover:text-text absolute right-3 top-2.5 cursor-pointer">
+              @if (showPassword()) {
+                <svg lucideEyeOff class="w-4 h-4"></svg>
+              } @else {
+                <svg lucideEye class="w-4 h-4"></svg>
+              }
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-xs pt-1">
+          <label for="remember-device" class="flex items-center gap-2 cursor-pointer text-muted font-medium">
+            <input 
+              id="remember-device"
+              type="checkbox" 
+              [ngModel]="rememberMe()" 
+              (ngModelChange)="rememberMe.set($event)"
+              name="rememberMe"
+              class="w-4 h-4 rounded text-primary"
+            />
+            <span>Recordar sesión en este dispositivo</span>
+          </label>
+        </div>
+
+        <button 
+          type="submit" 
+          class="w-full bg-primary hover:bg-primary-hover active:scale-[0.98] text-on-primary font-bold py-3 px-4 rounded-xl shadow-[0_6px_20px_rgba(11,99,182,0.4)] flex items-center justify-center gap-2 text-sm transition-all cursor-pointer">
+          <svg lucideLogIn class="w-4 h-4"></svg>
+          <span>Iniciar Sesión como Organizador</span>
+        </button>
+
+        <button 
+          type="button" 
+          (click)="fillShadithCredentials()"
+          class="w-full glass hover:bg-surface/50 text-muted font-semibold py-2 px-3 rounded-xl border border-border/40 text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+          <svg lucideSparkles class="w-3.5 h-3.5 text-amber-500"></svg>
+          <span>Autocompletar credenciales de Shadith</span>
+        </button>
+      </form>
+
+    </div>
+
+    <p class="text-center text-[11px] text-muted">
+      Event's World &copy; 2026 &middot; Sistema Salar Cristal
+    </p>
+
+  </div>
+</div>

@@ -1,1 +1,187 @@
 @import 'tailwindcss';
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --ew-bg: #e6f0fb;
+  --ew-surface: #ffffff;
+  --ew-surface-2: #ebf1f7;
+  --ew-border: #d3dee9;
+  --ew-control-border: #5a6b80;
+  --ew-text: #0e1b2a;
+  --ew-muted: #3e5367;
+  --ew-primary: #0b63b6;
+  --ew-primary-hover: #09528f;
+  --ew-on-primary: #ffffff;
+  --ew-accent: #e5533b;
+  --ew-glass: rgba(255, 255, 255, 0.55);
+  --ew-glass-overlay: rgba(255, 255, 255, 0.78);
+  --ew-glass-border: rgba(255, 255, 255, 0.75);
+  --ew-glass-highlight: rgba(255, 255, 255, 0.9);
+  --ew-glass-shadow: 0 10px 30px rgba(14, 27, 42, 0.12);
+  --ew-blur: blur(22px) saturate(180%);
+  --ew-backdrop:
+    radial-gradient(42% 30% at 10% 6%, rgba(11, 99, 182, 0.45), transparent 70%),
+    radial-gradient(40% 30% at 94% 22%, rgba(229, 83, 59, 0.42), transparent 72%),
+    radial-gradient(50% 34% at 26% 64%, rgba(90, 176, 255, 0.55), transparent 72%),
+    radial-gradient(40% 28% at 86% 92%, rgba(229, 83, 59, 0.3), transparent 70%),
+    linear-gradient(180deg, #e6f0fb, #f6eeec);
+  --ew-pending-bg: #fef3c7;
+  --ew-pending-fg: #8a3b0a;
+  --ew-approved-bg: #dcfce7;
+  --ew-approved-fg: #166534;
+  --ew-observed-bg: #ede9fe;
+  --ew-observed-fg: #5b21b6;
+  --ew-rejected-bg: #fee2e2;
+  --ew-rejected-fg: #991b1b;
+  --ew-info-bg: #dbeafe;
+  --ew-info-fg: #1e40af;
+  --ew-neutral-bg: #ebf1f7;
+  --ew-neutral-fg: #3e5367;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --ew-bg: #0a121c;
+    --ew-surface: #111c29;
+    --ew-surface-2: #182638;
+    --ew-border: #28394f;
+    --ew-control-border: #7f95b0;
+    --ew-text: #eaf2fa;
+    --ew-muted: #9ab0c6;
+    --ew-primary: #5ab0ff;
+    --ew-primary-hover: #84c4ff;
+    --ew-on-primary: #04192e;
+    --ew-accent: #ff8a73;
+    --ew-glass: rgba(17, 28, 41, 0.55);
+    --ew-glass-overlay: rgba(17, 28, 41, 0.78);
+    --ew-glass-border: rgba(255, 255, 255, 0.16);
+    --ew-glass-highlight: rgba(255, 255, 255, 0.14);
+    --ew-glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    --ew-blur: blur(22px) saturate(160%);
+    --ew-backdrop:
+      radial-gradient(42% 30% at 10% 6%, rgba(90, 176, 255, 0.45), transparent 70%),
+      radial-gradient(40% 30% at 94% 22%, rgba(255, 138, 115, 0.3), transparent 72%),
+      radial-gradient(50% 34% at 26% 64%, rgba(11, 99, 182, 0.55), transparent 72%),
+      radial-gradient(40% 28% at 86% 92%, rgba(255, 138, 115, 0.22), transparent 70%),
+      linear-gradient(180deg, #08172a, #0a121c);
+    --ew-pending-bg: #3a2a08;
+    --ew-pending-fg: #fcd34d;
+    --ew-approved-bg: #0b3b22;
+    --ew-approved-fg: #86efac;
+    --ew-observed-bg: #2e1a5e;
+    --ew-observed-fg: #c4b5fd;
+    --ew-rejected-bg: #4a1515;
+    --ew-rejected-fg: #fca5a5;
+    --ew-info-bg: #172554;
+    --ew-info-fg: #93c5fd;
+    --ew-neutral-bg: #182638;
+    --ew-neutral-fg: #9ab0c6;
+  }
+}
+
+.dark {
+  --ew-bg: #0a121c;
+  --ew-surface: #111c29;
+  --ew-surface-2: #182638;
+  --ew-border: #28394f;
+  --ew-control-border: #7f95b0;
+  --ew-text: #eaf2fa;
+  --ew-muted: #9ab0c6;
+  --ew-primary: #5ab0ff;
+  --ew-primary-hover: #84c4ff;
+  --ew-on-primary: #04192e;
+  --ew-accent: #ff8a73;
+  --ew-glass: rgba(17, 28, 41, 0.55);
+  --ew-glass-overlay: rgba(17, 28, 41, 0.78);
+  --ew-glass-border: rgba(255, 255, 255, 0.16);
+  --ew-glass-highlight: rgba(255, 255, 255, 0.14);
+  --ew-glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --ew-blur: blur(22px) saturate(160%);
+  --ew-backdrop:
+    radial-gradient(42% 30% at 10% 6%, rgba(90, 176, 255, 0.45), transparent 70%),
+    radial-gradient(40% 30% at 94% 22%, rgba(255, 138, 115, 0.3), transparent 72%),
+    radial-gradient(50% 34% at 26% 64%, rgba(11, 99, 182, 0.55), transparent 72%),
+    radial-gradient(40% 28% at 86% 92%, rgba(255, 138, 115, 0.22), transparent 70%),
+    linear-gradient(180deg, #08172a, #0a121c);
+  --ew-pending-bg: #3a2a08;
+  --ew-pending-fg: #fcd34d;
+  --ew-approved-bg: #0b3b22;
+  --ew-approved-fg: #86efac;
+  --ew-observed-bg: #2e1a5e;
+  --ew-observed-fg: #c4b5fd;
+  --ew-rejected-bg: #4a1515;
+  --ew-rejected-fg: #fca5a5;
+  --ew-info-bg: #172554;
+  --ew-info-fg: #93c5fd;
+  --ew-neutral-bg: #182638;
+  --ew-neutral-fg: #9ab0c6;
+}
+
+@theme inline {
+  --font-sans: 'Outfit', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+  --color-bg: var(--ew-bg);
+  --color-surface: var(--ew-surface);
+  --color-surface-2: var(--ew-surface-2);
+  --color-border: var(--ew-border);
+  --color-control: var(--ew-control-border);
+  --color-text: var(--ew-text);
+  --color-muted: var(--ew-muted);
+  --color-primary: var(--ew-primary);
+  --color-primary-hover: var(--ew-primary-hover);
+  --color-on-primary: var(--ew-on-primary);
+  --color-accent: var(--ew-accent);
+}
+
+@utility glass {
+  background: var(--ew-glass);
+  border: 1px solid var(--ew-glass-border);
+  backdrop-filter: var(--ew-blur);
+  -webkit-backdrop-filter: var(--ew-blur);
+  box-shadow: inset 0 1px 0 var(--ew-glass-highlight), var(--ew-glass-shadow);
+}
+
+@utility glass-overlay {
+  background: var(--ew-glass-overlay);
+  border: 1px solid var(--ew-glass-border);
+  backdrop-filter: var(--ew-blur);
+  -webkit-backdrop-filter: var(--ew-blur);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass-overlay {
+    background: var(--ew-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-color: var(--ew-border);
+  }
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .glass,
+  .glass-overlay {
+    background: var(--ew-surface);
+    border-color: var(--ew-border);
+  }
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--ew-text);
+  background-color: var(--ew-bg);
+  min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--ew-backdrop);
+  background-repeat: no-repeat;
+  background-size: cover;
+}

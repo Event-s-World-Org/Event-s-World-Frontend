@@ -7,9 +7,6 @@ import { RuntimeConfigService } from './runtime-config.service';
 export class FeatureFlagService {
   private readonly runtimeConfig = inject(RuntimeConfigService);
 
-  /**
-   * Banderas reactivas específicas para la interfaz del Organizador y la Demo:
-   */
   readonly canReviewPayments = computed(() =>
     this.runtimeConfig.isEnabled('enablePaymentReview'),
   );
@@ -34,9 +31,6 @@ export class FeatureFlagService {
     this.runtimeConfig.isEnabled('enablePublicExplore'),
   );
 
-  /**
-   * Método genérico para consultar cualquier bandera
-   */
   isEnabled(flagKey: string): boolean {
     return this.runtimeConfig.isEnabled(flagKey);
   }
