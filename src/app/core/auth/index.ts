@@ -1,4 +1,5 @@
 export * from './auth.service';
+export * from './current-user.service';
 export * from './guards';
 export * from './participant-session.service';
-export * from './tokens';
+export * from './supabase-auth';

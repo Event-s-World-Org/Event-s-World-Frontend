@@ -1,109 +1,77 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
-import type { Session, User } from '@supabase/supabase-js';
-import { SUPABASE_CLIENT } from './tokens';
+import type { GoTrueClient, Session, User } from '@supabase/auth-js';
+import { ConfigService } from '../config';
+import { SUPABASE_AUTH, supabaseStorageKey } from './supabase-auth';
 
+/**
+ * Supabase session of a user with an account (ADR-0004). The Supabase client is loaded only
+ * when a session may exist (one is stored) or when a flow asks for it (login, sign-up), so
+ * anonymous visitors never download it.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  readonly #supabase = inject(SUPABASE_CLIENT);
-  readonly #platformId = inject(PLATFORM_ID);
+  readonly #loadClient = inject(SUPABASE_AUTH);
+  readonly #config = inject(ConfigService);
+  readonly #isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   readonly #session = signal<Session | null>(null);
-  readonly #user = signal<User | null>(null);
-  readonly #globalRole = signal<'user' | 'super_admin' | null>(null);
-
   readonly session = this.#session.asReadonly();
-  readonly user = this.#user.asReadonly();
-  readonly globalRole = this.#globalRole.asReadonly();
+  readonly user = computed<User | null>(() => this.#session()?.user ?? null);
   readonly isAuthenticated = computed(() => !!this.#session());
-  readonly isSuperAdmin = computed(() => this.#globalRole() === 'super_admin');
+
+  #initialized: Promise<GoTrueClient | null> | null = null;
 
   constructor() {
-    if (isPlatformBrowser(this.#platformId) && this.#supabase) {
-      this.#initSession();
+    if (this.#isBrowser && this.#hasStoredSession()) {
+      void this.client();
     }
   }
 
-  async #initSession(): Promise<void> {
-    if (!this.#supabase) return;
-
-    try {
-      const { data } = await this.#supabase.auth.getSession();
-      if (data?.session) {
-        this.#setSession(data.session);
-      }
-
-      this.#supabase.auth.onAuthStateChange((_event, session) => {
-        this.#setSession(session);
-      });
-    } catch (error) {
-      console.warn('Failed to initialize Supabase session:', error);
-    }
-  }
-
-  #setSession(session: Session | null): void {
-    this.#session.set(session);
-    this.#user.set(session?.user ?? null);
-    if (session?.user?.app_metadata && typeof session.user.app_metadata['global_role'] === 'string') {
-      this.#globalRole.set(session.user.app_metadata['global_role'] as 'user' | 'super_admin');
-    } else {
-      this.#globalRole.set(session?.user ? 'user' : null);
-    }
-  }
-
-  async getAccessToken(): Promise<string | null> {
-    if (!isPlatformBrowser(this.#platformId) || !this.#supabase) {
-      return null;
-    }
-
-    const currentSession = this.#session();
-    if (currentSession?.access_token) {
-      // Check if expired, refresh if needed
-      const expiresAt = currentSession.expires_at;
-      const now = Math.floor(Date.now() / 1000);
-      if (expiresAt && expiresAt > now + 60) {
-        return currentSession.access_token;
-      }
-    }
-
-    try {
-      const { data, error } = await this.#supabase.auth.getSession();
-      if (error || !data?.session) {
+  /** The Supabase Auth client (null on the server). Login and sign-up flows use it directly. */
+  client(): Promise<GoTrueClient | null> {
+    this.#initialized ??= this.#loadClient().then(async (client) => {
+      if (!client) {
         return null;
       }
-      this.#setSession(data.session);
-      return data.session.access_token;
-    } catch {
+      const { data } = await client.getSession();
+      this.#session.set(data.session);
+      client.onAuthStateChange((_event, session) => this.#session.set(session));
+      return client;
+    });
+    return this.#initialized;
+  }
+
+  /** A valid access token, refreshed by Supabase when needed; null without a session. */
+  async getAccessToken(): Promise<string | null> {
+    if (!this.#isBrowser || (!this.#initialized && !this.#hasStoredSession())) {
       return null;
     }
+    const client = await this.client();
+    if (!client) {
+      return null;
+    }
+    const { data } = await client.getSession();
+    return data.session?.access_token ?? null;
   }
 
   async checkAuthenticated(): Promise<boolean> {
-    if (!isPlatformBrowser(this.#platformId) || !this.#supabase) {
-      return false;
-    }
-    const token = await this.getAccessToken();
-    return !!token;
+    return (await this.getAccessToken()) !== null;
   }
 
   async signOut(): Promise<void> {
-    if (!isPlatformBrowser(this.#platformId) || !this.#supabase) {
-      this.#setSession(null);
-      return;
-    }
-    try {
-      await this.#supabase.auth.signOut();
-    } finally {
-      this.#setSession(null);
-    }
+    const client = this.#initialized ? await this.client() : null;
+    await client?.signOut();
+    this.#session.set(null);
   }
 
-  // Helper for tests / manual overrides
-  setTestSession(session: Session | null, role: 'user' | 'super_admin' | null = 'user'): void {
-    this.#session.set(session);
-    this.#user.set(session?.user ?? null);
-    this.#globalRole.set(role);
+  #hasStoredSession(): boolean {
+    try {
+      return localStorage.getItem(supabaseStorageKey(this.#config.config().supabaseUrl)) !== null;
+    } catch {
+      return false;
+    }
   }
 }
