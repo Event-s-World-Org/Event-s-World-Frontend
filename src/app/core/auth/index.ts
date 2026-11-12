@@ -1,2 +1,4 @@
-// Authentication sessions and route guards (TS-014 / US-001)
-export {};
+export * from './auth.service';
+export * from './guards';
+export * from './participant-session.service';
+export * from './tokens';

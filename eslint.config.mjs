@@ -38,6 +38,9 @@ const featureBoundaryConfigs = FEATURES.map((feature) => {
 
 export default tseslint.config(
   {
+    ignores: ['src/app/core/api/generated/**', 'dist/**', 'node_modules/**'],
+  },
+  {
     files: ['**/*.ts'],
     extends: [
       eslint.configs.recommended,

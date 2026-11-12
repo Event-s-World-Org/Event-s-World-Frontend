@@ -1,0 +1,11 @@
+{
+  "apiUrl": "http://localhost:5000",
+  "supabaseUrl": "https://example.supabase.co",
+  "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy_anon_key",
+  "features": {
+    "coAdmin": false,
+    "teamSplitter": false,
+    "checkIn": false,
+    "refunds": false
+  }
+}
