@@ -7,10 +7,11 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "eslint src/",
+    "lint": "eslint src/ e2e/ playwright.config.ts",
     "api:generate": "orval",
     "api:check": "orval && git add --intent-to-add -- src/app/core/api/generated && git diff --exit-code -- src/app/core/api/generated",
-    "serve:ssr:EventsWorld": "node dist/EventsWorld/server/server.mjs"
+    "serve:ssr:EventsWorld": "node dist/EventsWorld/server/server.mjs",
+    "e2e": "playwright test"
   },
   "prettier": {
     "printWidth": 100,
@@ -47,6 +48,7 @@
     "@angular/build": "^21.2.29",
     "@angular/cli": "^21.2.29",
     "@angular/compiler-cli": "^21.2.26",
+    "@playwright/test": "^1.65.0",
     "@tailwindcss/postcss": "^4.1.0",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.0",
