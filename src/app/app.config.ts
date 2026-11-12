@@ -17,8 +17,12 @@ import {
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { routes } from './app.routes';
-import { authInterceptor, errorInterceptor, idempotencyInterceptor } from './core/api';
-import { provideSupabaseClient } from './core/auth';
+import {
+  apiBaseUrlInterceptor,
+  authInterceptor,
+  errorInterceptor,
+  idempotencyInterceptor,
+} from './core/api/interceptors';
 import { ConfigService } from './core/config';
 import { ThemeService } from './core/theme';
 
@@ -32,9 +36,14 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(withEventReplay(), withIncrementalHydration()),
     provideHttpClient(
       withFetch(),
-      withInterceptors([idempotencyInterceptor, authInterceptor, errorInterceptor]),
+      // Order matters: the base URL first, so the others see the final backend URL.
+      withInterceptors([
+        apiBaseUrlInterceptor,
+        idempotencyInterceptor,
+        authInterceptor,
+        errorInterceptor,
+      ]),
     ),
-    provideSupabaseClient(),
     { provide: LOCALE_ID, useValue: 'es-BO' },
     provideAppInitializer(async () => {
       inject(ThemeService);

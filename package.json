@@ -9,6 +9,7 @@
     "test": "ng test",
     "lint": "eslint src/",
     "api:generate": "orval",
+    "api:check": "orval && git add --intent-to-add -- src/app/core/api/generated && git diff --exit-code -- src/app/core/api/generated",
     "serve:ssr:EventsWorld": "node dist/EventsWorld/server/server.mjs"
   },
   "prettier": {
