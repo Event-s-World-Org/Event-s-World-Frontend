@@ -2,6 +2,10 @@ import { isPlatformBrowser } from '@angular/common';
 import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 import { AppConfig, DEFAULT_CONFIG } from './config.model';
 
+/**
+ * Runtime configuration read from `/config.json` at startup (frontend.md §4), so URLs, keys and
+ * feature flags change per environment without a rebuild.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -13,16 +17,9 @@ export class ConfigService {
   readonly config = this.#config.asReadonly();
   readonly isLoaded = this.#isLoaded.asReadonly();
 
+  /** Backend origin without a trailing slash. */
   get apiUrl(): string {
-    return this.#config().apiUrl;
-  }
-
-  get supabaseUrl(): string {
-    return this.#config().supabaseUrl;
-  }
-
-  get supabaseAnonKey(): string {
-    return this.#config().supabaseAnonKey;
+    return this.#config().apiUrl.replace(/\/+$/, '');
   }
 
   async loadConfig(): Promise<AppConfig> {
@@ -62,16 +59,5 @@ export class ConfigService {
       this.#isLoaded.set(true);
       return this.#config();
     }
-  }
-
-  setConfig(newConfig: Partial<AppConfig>): void {
-    this.#config.update((current) => ({
-      ...current,
-      ...newConfig,
-      features: {
-        ...current.features,
-        ...(newConfig.features ?? {}),
-      },
-    }));
   }
 }

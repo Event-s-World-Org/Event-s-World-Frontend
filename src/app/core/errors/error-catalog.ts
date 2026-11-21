@@ -1,63 +1,59 @@
 import { ApiError, ProblemDetails } from './problem-details.model';
 
 export const DEFAULT_ERROR_MESSAGE =
-  'Ha ocurrido un error inesperado. Por favor, intenta de nuevo.';
+  'Ocurrió un error inesperado. Inténtalo de nuevo en unos minutos.';
 
-export const ERROR_MESSAGES: Record<string, string> = {
-  // Auth & Accounts
-  VALIDATION_ERROR: 'Los datos ingresados no son válidos. Por favor, revisa el formulario.',
-  UNAUTHORIZED: 'Debes iniciar sesión para continuar.',
-  FORBIDDEN: 'No tienes permisos para realizar esta acción.',
-  ACCOUNT_SUSPENDED: 'Tu cuenta ha sido suspendida. Contacta a soporte para más información.',
-  INVALID_CREDENTIALS: 'El correo electrónico o la contraseña son incorrectos.',
-  EMAIL_ALREADY_EXISTS: 'Ya existe una cuenta registrada con este correo electrónico.',
-  USER_NOT_FOUND: 'No se encontró el usuario solicitado.',
-  RATE_LIMIT_EXCEEDED: 'Has excedido el límite de intentos. Por favor, intenta de nuevo más tarde.',
-
-  // Events
-  EVENT_NOT_FOUND: 'El evento no fue encontrado.',
-  EVENT_SUSPENDED: 'Este evento se encuentra suspendido.',
-  EVENT_CANCELLED: 'Este evento ha sido cancelado.',
-  REGISTRATIONS_CLOSED: 'Las inscripciones para este evento están cerradas.',
-  REGISTRATIONS_PAUSED: 'Las inscripciones están pausadas temporalmente.',
-  CAPACITY_EXCEEDED: 'Lo sentimos, ya no quedan cupos disponibles para este evento.',
-
-  // Registrations & Payments
-  REGISTRATION_NOT_FOUND: 'La inscripción no fue encontrada.',
-  DUPLICATE_REGISTRATION: 'Ya existe una inscripción registrada con estos datos.',
-  INVALID_PARTICIPANT_TOKEN: 'El enlace de acceso es inválido o ha expirado.',
-  PAYMENT_QR_EXPIRED: 'El código QR de pago ha expirado.',
-  INVALID_VOUCHER: 'El comprobante subido no es válido o está dañado.',
-  VOUCHER_TOO_LARGE: 'El archivo excede el tamaño máximo permitido de 5 MB.',
-  PAYMENT_ALREADY_APPROVED: 'Este pago ya ha sido aprobado previamente.',
-  PAYMENT_SUBMISSION_NOT_FOUND: 'El comprobante de pago no fue encontrado.',
-  REASON_REQUIRED: 'El motivo es obligatorio para observar o rechazar.',
-
-  // General HTTP status / Infrastructure
-  NOT_FOUND: 'El recurso solicitado no fue encontrado.',
-  INTERNAL_SERVER_ERROR: 'Ocurrió un error interno en el servidor.',
+/**
+ * Spanish messages for the backend error codes. Codes follow the backend convention
+ * `module.snake_case` (Error.Code in the Shared Kernel). Add a code here when a story adds it.
+ */
+export const ERROR_MESSAGES: Readonly<Record<string, string>> = {
+  // Accounts (US-001, US-002, US-006, US-031)
+  'accounts.suspended': 'Tu cuenta está suspendida. Escríbenos si crees que es un error.',
+  'accounts.underage': 'Debes ser mayor de 18 años para crear una cuenta.',
+  'accounts.email_not_verified': 'Verifica tu correo electrónico para continuar.',
+  'accounts.profile_missing': 'Completa tu perfil para continuar.',
+  'accounts.has_active_events':
+    'No puedes eliminar tu cuenta mientras tengas eventos publicados o con inscritos.',
+  // Legal (US-001, US-015)
+  'legal.outdated_version': 'Los términos cambiaron. Vuelve a aceptarlos para continuar.',
+  // Events (US-027)
+  'events.field_locked': 'Este dato ya no se puede cambiar porque el evento tiene inscripciones.',
+  // Registrations (US-008, US-024, US-028)
+  'registrations.capacity_full': 'Ya no quedan cupos para este evento.',
+  'registrations.paused':
+    'Las inscripciones están pausadas por ahora. Vuelve a intentarlo más tarde.',
 };
 
-export function getErrorMessage(
-  code?: string | null,
-  fallbackDetail?: string | null,
-): string {
-  if (code && typeof code === 'string' && ERROR_MESSAGES[code]) {
+/** Fallback by HTTP status when the code is unknown or missing (status 0 = no connection). */
+const STATUS_MESSAGES: Readonly<Record<number, string>> = {
+  0: 'No pudimos conectarnos. Revisa tu conexión a internet e inténtalo de nuevo.',
+  401: 'Tu sesión terminó. Vuelve a ingresar para continuar.',
+  403: 'No tienes permiso para realizar esta acción.',
+  404: 'No encontramos lo que buscabas.',
+  429: 'Hiciste demasiados intentos. Espera un momento e inténtalo de nuevo.',
+};
+
+/**
+ * The message shown to the user. The backend `detail` is never shown: it is technical and in
+ * English. It stays in `ApiError.detail` for logs.
+ */
+export function getErrorMessage(code?: string | null, status?: number): string {
+  if (code && ERROR_MESSAGES[code]) {
     return ERROR_MESSAGES[code];
   }
-  if (fallbackDetail && typeof fallbackDetail === 'string' && fallbackDetail.trim().length > 0) {
-    return fallbackDetail;
+  if (status !== undefined && STATUS_MESSAGES[status]) {
+    return STATUS_MESSAGES[status];
   }
   return DEFAULT_ERROR_MESSAGE;
 }
 
 export function parseProblemDetails(errorResponse: unknown, status = 500): ApiError {
-  if (typeof errorResponse === 'object' && errorResponse !== null) {
-    const details = errorResponse as ProblemDetails;
-    const userMessage = getErrorMessage(details.code, details.detail);
-    return new ApiError(userMessage, details.status ?? status, details);
-  }
+  const details =
+    typeof errorResponse === 'object' && errorResponse !== null && !(errorResponse instanceof Event)
+      ? (errorResponse as ProblemDetails)
+      : undefined;
+  const effectiveStatus = details?.status ?? status;
 
-  const fallbackMessage = typeof errorResponse === 'string' ? errorResponse : DEFAULT_ERROR_MESSAGE;
-  return new ApiError(fallbackMessage, status);
+  return new ApiError(getErrorMessage(details?.code, effectiveStatus), effectiveStatus, details);
 }

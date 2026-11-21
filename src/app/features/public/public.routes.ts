@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Routes } from '@angular/router';
+import { ForbiddenPage } from './pages/forbidden-page';
 
 @Component({
   selector: 'app-explore-events-page',
@@ -73,18 +74,6 @@ export class TermsPage {}
   `,
 })
 export class PrivacyPage {}
-
-@Component({
-  selector: 'app-forbidden-page',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <main class="p-6">
-      <h1 i18n="@@public.forbidden.title" class="text-2xl font-bold">Acceso no autorizado</h1>
-      <p class="mt-2 text-muted">No tienes permisos para acceder a este recurso.</p>
-    </main>
-  `,
-})
-export class ForbiddenPage {}
 
 @Component({
   selector: 'app-not-found-page',

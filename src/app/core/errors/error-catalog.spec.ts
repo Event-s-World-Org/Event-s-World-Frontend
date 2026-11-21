@@ -1,51 +1,41 @@
-import { describe, expect, it } from 'vitest';
-import {
-  DEFAULT_ERROR_MESSAGE,
-  ERROR_MESSAGES,
-  getErrorMessage,
-  parseProblemDetails,
-} from './error-catalog';
-import { ProblemDetails } from './problem-details.model';
+import { DEFAULT_ERROR_MESSAGE, ERROR_MESSAGES, getErrorMessage, parseProblemDetails } from './error-catalog';
 
-describe('error-catalog', () => {
-  it('should return defined message for known error code', () => {
-    expect(getErrorMessage('CAPACITY_EXCEEDED')).toBe(ERROR_MESSAGES['CAPACITY_EXCEEDED']);
-    expect(getErrorMessage('VALIDATION_ERROR')).toBe(ERROR_MESSAGES['VALIDATION_ERROR']);
+describe('error catalog', () => {
+  it('maps backend codes (module.snake_case) to Spanish messages', () => {
+    expect(getErrorMessage('registrations.capacity_full')).toBe(
+      ERROR_MESSAGES['registrations.capacity_full'],
+    );
+    expect(getErrorMessage('accounts.suspended')).toContain('suspendida');
   });
 
-  it('should return default generic Spanish message for unknown error code', () => {
-    expect(getErrorMessage('COMPLETELY_UNKNOWN_ERROR_CODE')).toBe(DEFAULT_ERROR_MESSAGE);
-    expect(getErrorMessage(undefined)).toBe(DEFAULT_ERROR_MESSAGE);
+  it('falls back to a message by status, then to the generic message', () => {
+    expect(getErrorMessage('unknown.code', 429)).toContain('demasiados intentos');
+    expect(getErrorMessage(undefined, 0)).toContain('conexión');
+    expect(getErrorMessage('unknown.code', 400)).toBe(DEFAULT_ERROR_MESSAGE);
     expect(getErrorMessage(null)).toBe(DEFAULT_ERROR_MESSAGE);
   });
 
-  it('should return fallback detail if code is absent but detail exists', () => {
-    const detail = 'Este es un mensaje específico del backend.';
-    expect(getErrorMessage(null, detail)).toBe(detail);
-    expect(getErrorMessage('', detail)).toBe(detail);
+  it('keeps the technical detail out of the user message', () => {
+    const error = parseProblemDetails(
+      { code: 'unknown.code', status: 500, detail: 'Npgsql timeout at line 42' },
+      500,
+    );
+
+    expect(error.userMessage).toBe(DEFAULT_ERROR_MESSAGE);
+    expect(error.detail).toBe('Npgsql timeout at line 42');
+    expect(error.status).toBe(500);
   });
 
-  it('should parse ProblemDetails object into typed ApiError with translated userMessage', () => {
-    const problem: ProblemDetails = {
-      type: 'https://tools.ietf.org/html/rfc9110#section-15.5.1',
-      title: 'Bad Request',
-      status: 400,
-      code: 'CAPACITY_EXCEEDED',
-      detail: 'The event capacity has been reached.',
-    };
+  it('uses the generic message for non-JSON bodies such as a proxy HTML page', () => {
+    const error = parseProblemDetails('<html>502 Bad Gateway</html>', 502);
 
-    const apiError = parseProblemDetails(problem, 400);
-
-    expect(apiError.status).toBe(400);
-    expect(apiError.code).toBe('CAPACITY_EXCEEDED');
-    expect(apiError.userMessage).toBe(ERROR_MESSAGES['CAPACITY_EXCEEDED']);
-    expect(apiError.detail).toBe('The event capacity has been reached.');
+    expect(error.userMessage).toBe(DEFAULT_ERROR_MESSAGE);
+    expect(error.status).toBe(502);
   });
 
-  it('should parse unknown error into ApiError with default message', () => {
-    const apiError = parseProblemDetails(null, 500);
+  it('treats a network failure (status 0) as a connection problem', () => {
+    const error = parseProblemDetails(new ProgressEvent('error'), 0);
 
-    expect(apiError.status).toBe(500);
-    expect(apiError.userMessage).toBe(DEFAULT_ERROR_MESSAGE);
+    expect(error.userMessage).toContain('conexión');
   });
 });

@@ -1,29 +1,40 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpContext, HttpContextToken, HttpInterceptorFn } from '@angular/common/http';
 
-function generateUuid(): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
-  }
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
+/**
+ * The key must be created ONCE per form (US-008, US-024) and reused on every retry, so a retry
+ * after a timeout returns the same registration instead of creating a second one
+ * (backend.md §4). Usage:
+ *
+ * ```ts
+ * readonly idempotencyKey = createIdempotencyKey();   // when the form opens
+ * api.createInPersonRegistration(eventId, body, { context: withIdempotencyKey(this.idempotencyKey) });
+ * ```
+ */
+export const IDEMPOTENCY_KEY = new HttpContextToken<string | null>(() => null);
+
+export function createIdempotencyKey(): string {
+  return crypto.randomUUID();
 }
 
-export const idempotencyInterceptor: HttpInterceptorFn = (req, next) => {
-  const isRegistrationPost =
-    req.method === 'POST' &&
-    (req.url.includes('/registrations') ||
-      req.url.includes('/inscripcion') ||
-      req.headers.has('X-Idempotent'));
+export function withIdempotencyKey(key: string, context = new HttpContext()): HttpContext {
+  return context.set(IDEMPOTENCY_KEY, key);
+}
 
-  if (isRegistrationPost && !req.headers.has('Idempotency-Key')) {
-    const cloned = req.clone({
-      headers: req.headers.set('Idempotency-Key', generateUuid()),
-    });
-    return next(cloned);
+/** The two endpoints that accept the header (backend.md §4). */
+const IDEMPOTENT_ENDPOINTS = [/\/api\/v1\/public\/events\/[^/]+\/registrations$/, /\/registrations\/in-person$/];
+
+/**
+ * Sends `Idempotency-Key` from the request context. As a safety net, registration POSTs without
+ * one get a fresh key; that protects a single request but not a retry, so forms must pass theirs.
+ */
+export const idempotencyInterceptor: HttpInterceptorFn = (req, next) => {
+  if (req.method !== 'POST' || req.headers.has('Idempotency-Key')) {
+    return next(req);
   }
 
-  return next(req);
+  const key =
+    req.context.get(IDEMPOTENCY_KEY) ??
+    (IDEMPOTENT_ENDPOINTS.some((endpoint) => endpoint.test(req.url)) ? createIdempotencyKey() : null);
+
+  return next(key ? req.clone({ setHeaders: { 'Idempotency-Key': key } }) : req);
 };

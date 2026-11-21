@@ -1,11 +1,13 @@
 {
-  "apiUrl": "http://localhost:5000",
-  "supabaseUrl": "https://example.supabase.co",
-  "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy_anon_key",
+  "apiUrl": "http://localhost:5037",
+  "supabaseUrl": "https://<project-ref>.supabase.co",
+  "supabasePublishableKey": "<supabase-publishable-key>",
   "features": {
     "coAdmin": false,
     "teamSplitter": false,
     "checkIn": false,
-    "refunds": false
+    "refunds": false,
+    "paymentReview": true,
+    "eventSettings": true
   }
 }

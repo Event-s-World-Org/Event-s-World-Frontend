@@ -1,14 +1,14 @@
-import { isPlatformBrowser } from '@angular/common';
-import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 
-const PARTICIPANT_TOKEN_KEY = 'ew_participant_token';
-const REGISTRATION_ID_KEY = 'ew_registration_id';
-
+/**
+ * Short-lived participant token (30 minutes) obtained from the personal link (US-010).
+ * It lives ONLY in memory (NFR-04.1): no storage an XSS could read. After a reload the
+ * participant opens the personal link again.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class ParticipantSessionService {
-  readonly #platformId = inject(PLATFORM_ID);
   readonly #token = signal<string | null>(null);
   readonly #registrationId = signal<string | null>(null);
 
@@ -16,31 +16,9 @@ export class ParticipantSessionService {
   readonly registrationId = this.#registrationId.asReadonly();
   readonly isAuthenticated = computed(() => !!this.#token());
 
-  constructor() {
-    if (isPlatformBrowser(this.#platformId)) {
-      const storedToken = sessionStorage.getItem(PARTICIPANT_TOKEN_KEY);
-      const storedRegistrationId = sessionStorage.getItem(REGISTRATION_ID_KEY);
-      if (storedToken) {
-        this.#token.set(storedToken);
-      }
-      if (storedRegistrationId) {
-        this.#registrationId.set(storedRegistrationId);
-      }
-    }
-  }
-
   setSession(token: string, registrationId?: string): void {
     this.#token.set(token);
-    if (registrationId) {
-      this.#registrationId.set(registrationId);
-    }
-
-    if (isPlatformBrowser(this.#platformId)) {
-      sessionStorage.setItem(PARTICIPANT_TOKEN_KEY, token);
-      if (registrationId) {
-        sessionStorage.setItem(REGISTRATION_ID_KEY, registrationId);
-      }
-    }
+    this.#registrationId.set(registrationId ?? null);
   }
 
   getToken(): string | null {
@@ -54,10 +32,5 @@ export class ParticipantSessionService {
   clearSession(): void {
     this.#token.set(null);
     this.#registrationId.set(null);
-
-    if (isPlatformBrowser(this.#platformId)) {
-      sessionStorage.removeItem(PARTICIPANT_TOKEN_KEY);
-      sessionStorage.removeItem(REGISTRATION_ID_KEY);
-    }
   }
 }

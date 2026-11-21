@@ -1,34 +1,36 @@
+import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
 import { ConfigService } from './config.service';
 import { FeatureFlagService } from './feature-flag.service';
 
 describe('FeatureFlagService', () => {
-  let configService: ConfigService;
-  let flagService: FeatureFlagService;
-
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    configService = TestBed.inject(ConfigService);
-    flagService = TestBed.inject(FeatureFlagService);
+    TestBed.configureTestingModule({ providers: [{ provide: PLATFORM_ID, useValue: 'browser' }] });
   });
 
-  it('should return false for disabled default features', () => {
-    expect(flagService.isEnabled('coAdmin')).toBe(false);
-    expect(flagService.isEnabled('unknownFlag')).toBe(false);
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('uses the defaults until config.json is loaded', () => {
+    const flags = TestBed.inject(FeatureFlagService);
+
+    expect(flags.isEnabled('teamSplitter')).toBe(false);
+    expect(flags.isEnabled('paymentReview')).toBe(true);
   });
 
-  it('should reactively return true when feature flag is enabled without rebuild', () => {
-    expect(flagService.isEnabled('refunds')).toBe(false);
+  it('follows config.json without a rebuild', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ features: { teamSplitter: true, paymentReview: false } }),
+      }),
+    );
+    const flags = TestBed.inject(FeatureFlagService);
 
-    configService.setConfig({
-      features: {
-        ...configService.config().features,
-        refunds: true,
-      },
-    });
+    await TestBed.inject(ConfigService).loadConfig();
 
-    expect(flagService.isEnabled('refunds')).toBe(true);
-    expect(flagService.features()['refunds']).toBe(true);
+    expect(flags.isEnabled('teamSplitter')).toBe(true);
+    expect(flags.isEnabled('paymentReview')).toBe(false);
+    expect(flags.isEnabled('refunds')).toBe(false);
   });
 });

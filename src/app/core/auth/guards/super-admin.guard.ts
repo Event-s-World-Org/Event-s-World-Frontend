@@ -2,24 +2,24 @@ import { isPlatformBrowser } from '@angular/common';
 import { PLATFORM_ID, inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../auth.service';
+import { CurrentUserService } from '../current-user.service';
 
-export const superAdminGuard: CanActivateFn = async () => {
-  const authService = inject(AuthService);
+/** `/admin/**`: requires a session and the `super_admin` role from `GET /me` (ADR-0004). */
+export const superAdminGuard: CanActivateFn = async (_route, state) => {
+  // inject() only works before the first await.
   const router = inject(Router);
-  const platformId = inject(PLATFORM_ID);
+  const auth = inject(AuthService);
+  const currentUser = inject(CurrentUserService);
 
-  if (!isPlatformBrowser(platformId)) {
+  // Admin routes are client-rendered; the server only renders the shell.
+  if (!isPlatformBrowser(inject(PLATFORM_ID))) {
     return true;
   }
 
-  const isAuthenticated = await authService.checkAuthenticated();
-  if (!isAuthenticated) {
-    return router.createUrlTree(['/login']);
+  if (!(await auth.checkAuthenticated())) {
+    return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
   }
 
-  if (authService.isSuperAdmin()) {
-    return true;
-  }
-
-  return router.createUrlTree(['/']);
+  const profile = await currentUser.load();
+  return profile?.globalRole === 'super_admin' ? true : router.createUrlTree(['/403']);
 };

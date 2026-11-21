@@ -1,71 +1,383 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "info": {
     "title": "Event's World API",
-    "version": "1.0.0",
-    "description": "Event's World backend REST API specification"
+    "version": "0.1.0-provisional",
+    "description": "PROVISIONAL contract written from Docs/architecture/backend.md §4 until the backend publishes /openapi/v1.json (TS-004). Then orval reads that document instead of this file."
   },
-  "servers": [
-    {
-      "url": "http://localhost:5000",
-      "description": "Local development server"
-    }
-  ],
   "paths": {
+    "/api/v1/me": {
+      "get": {
+        "operationId": "getMe",
+        "summary": "Current user profile, global role and status (US-002)",
+        "tags": [
+          "Me"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/api/v1/me/events": {
+      "get": {
+        "operationId": "getMyEvents",
+        "summary": "Events where the user is a member (US-019)",
+        "tags": [
+          "Me"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MyEventSummary"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "published",
+                "registrations_closed",
+                "finished",
+                "suspended",
+                "cancelled"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/public/events": {
+      "get": {
+        "operationId": "getPublicEvents",
+        "summary": "Explore published events (US-013)",
+        "tags": [
+          "Public"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicEventPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "free",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/public/events/{slug}": {
+      "get": {
+        "operationId": "getPublicEvent",
+        "summary": "Public event page (US-007)",
+        "tags": [
+          "Public"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicEvent"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/public/events/{slug}/registrations": {
+      "post": {
+        "operationId": "createOnlineRegistration",
+        "summary": "Online registration with voucher (US-008). Send an Idempotency-Key header.",
+        "tags": [
+          "Public"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationReceipt"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "answers"
+                ],
+                "properties": {
+                  "answers": {
+                    "type": "string",
+                    "description": "JSON with the form answers."
+                  },
+                  "voucher": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/events": {
-      "get": {
-        "summary": "List events",
-        "operationId": "getEvents",
-        "responses": {
-          "200": {
-            "description": "List of events",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EventDto"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
       "post": {
-        "summary": "Create an event",
         "operationId": "createEvent",
+        "summary": "Create a draft event (US-003)",
+        "tags": [
+          "Events"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Event"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateEventDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Event created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EventDto"
-                }
+                "$ref": "#/components/schemas/CreateEvent"
               }
             }
           }
         }
       }
     },
-    "/api/v1/events/{id}": {
+    "/api/v1/events/{eventId}": {
       "get": {
-        "summary": "Get event detail",
-        "operationId": "getEventById",
+        "operationId": "getEvent",
+        "summary": "Event for its organizers (US-003)",
+        "tags": [
+          "Events"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Event"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
         "parameters": [
           {
-            "name": "id",
+            "name": "eventId",
             "in": "path",
             "required": true,
             "schema": {
@@ -73,28 +385,46 @@
               "format": "uuid"
             }
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "Event detail",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EventDto"
-                }
-              }
-            }
-          }
-        }
+        ]
       }
     },
-    "/api/v1/events/{id}/registrations": {
+    "/api/v1/events/{eventId}/registrations/in-person": {
       "post": {
-        "summary": "Register to an event",
-        "operationId": "createRegistration",
+        "operationId": "createInPersonRegistration",
+        "summary": "In-person registration with QR or cash payment (US-024). Send an Idempotency-Key header.",
+        "tags": [
+          "Registrations"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationReceipt"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
         "parameters": [
           {
-            "name": "id",
+            "name": "eventId",
             "in": "path",
             "required": true,
             "schema": {
@@ -108,64 +438,126 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateRegistrationDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Registration created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RegistrationDto"
-                }
+                "$ref": "#/components/schemas/InPersonRegistration"
               }
             }
           }
         }
       }
     },
-    "/api/v1/events/{id}/payments": {
+    "/api/v1/events/{eventId}/payments": {
       "get": {
-        "summary": "List payment submissions for review",
-        "operationId": "getEventPayments",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
+        "operationId": "getPaymentSubmissions",
+        "summary": "Vouchers to review (US-009)",
+        "tags": [
+          "Payments"
         ],
         "responses": {
           "200": {
-            "description": "List of payment submissions",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/PaymentSubmissionDto"
+                    "$ref": "#/components/schemas/PaymentSubmission"
                   }
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
           }
-        }
-      }
-    },
-    "/api/v1/events/{id}/payments/{submissionId}/approve": {
-      "post": {
-        "summary": "Approve a payment submission",
-        "operationId": "approvePayment",
+        },
         "parameters": [
           {
-            "name": "id",
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "in_observation",
+                "approved",
+                "rejected"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/events/{eventId}/payments/{submissionId}/approve": {
+      "post": {
+        "operationId": "approvePayment",
+        "summary": "Approve a voucher (US-009)",
+        "tags": [
+          "Payments"
+        ],
+        "responses": {
+          "204": {
+            "description": "Approved"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "parameters": [
+          {
+            "name": "eventId",
             "in": "path",
             "required": true,
             "schema": {
@@ -182,38 +574,87 @@
               "format": "uuid"
             }
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "Payment approved"
-          }
-        }
+        ]
       }
     },
     "/api/v1/participant/sessions": {
       "post": {
-        "summary": "Exchange personal link token for participant session",
-        "operationId": "exchangeParticipantToken",
+        "operationId": "createParticipantSession",
+        "summary": "Exchange a personal-link token for a 30-minute participant token (US-010)",
+        "tags": [
+          "Participant"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParticipantSession"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ExchangeTokenDto"
+                "$ref": "#/components/schemas/ExchangeToken"
               }
             }
           }
-        },
+        }
+      }
+    },
+    "/api/v1/participant/registration": {
+      "get": {
+        "operationId": "getParticipantRegistration",
+        "summary": "The registration of the participant token (US-010)",
+        "tags": [
+          "Participant"
+        ],
         "responses": {
           "200": {
-            "description": "Participant session created",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ParticipantSessionDto"
+                  "$ref": "#/components/schemas/ParticipantRegistration"
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
           }
         }
       }
@@ -221,34 +662,276 @@
   },
   "components": {
     "schemas": {
-      "EventDto": {
+      "Money": {
         "type": "object",
-        "required": ["id", "title", "slug", "status", "capacity"],
+        "required": [
+          "amount",
+          "currency"
+        ],
+        "description": "Amount as a string with two decimals plus an ISO 4217 code (NFR-05.2). Never a floating-point number.",
+        "properties": {
+          "amount": {
+            "type": "string",
+            "pattern": "^-?\\d+\\.\\d{2}$",
+            "example": "120.00"
+          },
+          "currency": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 3,
+            "example": "BOB"
+          }
+        }
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "description": "RFC 9457 error with a stable `code` such as `registrations.capacity_full`.",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "instance": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "example": "registrations.capacity_full"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "Me": {
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "firstNames",
+          "lastNames",
+          "globalRole",
+          "status",
+          "emailVerified",
+          "hasEvents"
+        ],
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid"
           },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "firstNames": {
+            "type": "string"
+          },
+          "lastNames": {
+            "type": "string"
+          },
+          "globalRole": {
+            "type": "string",
+            "enum": [
+              "user",
+              "super_admin"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "suspended"
+            ]
+          },
+          "emailVerified": {
+            "type": "boolean"
+          },
+          "hasEvents": {
+            "type": "boolean"
+          }
+        }
+      },
+      "MyEventSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "slug",
+          "title",
+          "status",
+          "startsAt",
+          "timeZone",
+          "capacity",
+          "registrations",
+          "pendingVouchers"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slug": {
+            "type": "string"
+          },
           "title": {
             "type": "string"
           },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "registrations_closed",
+              "finished",
+              "suspended",
+              "cancelled"
+            ]
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "timeZone": {
+            "type": "string",
+            "example": "America/La_Paz"
+          },
+          "capacity": {
+            "type": "integer"
+          },
+          "registrations": {
+            "type": "integer"
+          },
+          "pendingVouchers": {
+            "type": "integer"
+          },
+          "coverUrl": {
+            "type": "string"
+          },
+          "qrExpiringSoon": {
+            "type": "boolean"
+          },
+          "qrExpired": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PublicEventSummary": {
+        "type": "object",
+        "required": [
+          "slug",
+          "title",
+          "startsAt",
+          "timeZone",
+          "city",
+          "isFree"
+        ],
+        "properties": {
           "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "isFree": {
+            "type": "boolean"
+          },
+          "price": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "coverUrl": {
+            "type": "string"
+          },
+          "registrationState": {
+            "type": "string",
+            "enum": [
+              "open",
+              "full",
+              "closed",
+              "paused",
+              "finished"
+            ]
+          }
+        }
+      },
+      "PublicEventPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicEventSummary"
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "PublicEvent": {
+        "type": "object",
+        "required": [
+          "slug",
+          "title",
+          "description",
+          "startsAt",
+          "endsAt",
+          "timeZone",
+          "country",
+          "city",
+          "venue",
+          "isFree",
+          "spotsLeft",
+          "registrationState",
+          "organizerContact"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "title": {
             "type": "string"
           },
           "description": {
             "type": "string"
           },
-          "status": {
-            "type": "string",
-            "enum": ["draft", "published", "registrations_closed", "finished", "suspended"]
+          "category": {
+            "type": "string"
           },
-          "capacity": {
-            "type": "integer"
-          },
-          "price": {
-            "type": "number"
-          },
-          "currency": {
+          "coverUrl": {
             "type": "string"
           },
           "startsAt": {
@@ -258,65 +941,342 @@
           "endsAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "registrationDeadline": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "venue": {
+            "type": "string"
+          },
+          "mapUrl": {
+            "type": "string"
+          },
+          "isFree": {
+            "type": "boolean"
+          },
+          "price": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "spotsLeft": {
+            "type": "integer"
+          },
+          "registrationState": {
+            "type": "string",
+            "enum": [
+              "open",
+              "full",
+              "closed",
+              "paused",
+              "finished"
+            ]
+          },
+          "organizerContact": {
+            "type": "string"
+          },
+          "minimumAge": {
+            "type": "integer"
           }
         }
       },
-      "CreateEventDto": {
+      "CreateEvent": {
         "type": "object",
-        "required": ["title", "slug", "capacity"],
+        "required": [
+          "title"
+        ],
+        "description": "A draft accepts missing fields; completeness is checked when publishing (US-006). The slug is generated by the backend.",
         "properties": {
           "title": {
-            "type": "string"
-          },
-          "slug": {
             "type": "string"
           },
           "description": {
             "type": "string"
           },
-          "capacity": {
-            "type": "integer"
-          },
-          "price": {
-            "type": "number"
-          },
-          "currency": {
-            "type": "string"
-          }
-        }
-      },
-      "CreateRegistrationDto": {
-        "type": "object",
-        "required": ["firstName", "lastName", "email"],
-        "properties": {
-          "firstName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string",
-            "format": "email"
-          },
-          "phone": {
-            "type": "string"
-          },
-          "voucherFileId": {
+          "categoryId": {
             "type": "string",
             "format": "uuid"
+          },
+          "country": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "venue": {
+            "type": "string"
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "registrationDeadline": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "capacity": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "organizerContact": {
+            "type": "string"
+          },
+          "minimumAge": {
+            "type": "integer"
           }
         }
       },
-      "RegistrationDto": {
+      "Event": {
         "type": "object",
-        "required": ["id", "eventId", "code", "status", "email"],
+        "required": [
+          "id",
+          "slug",
+          "title",
+          "status"
+        ],
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid"
           },
-          "eventId": {
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "registrations_closed",
+              "finished",
+              "suspended",
+              "cancelled"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "country": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "venue": {
+            "type": "string"
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "registrationDeadline": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "capacity": {
+            "type": "integer"
+          },
+          "organizerContact": {
+            "type": "string"
+          },
+          "minimumAge": {
+            "type": "integer"
+          },
+          "isFree": {
+            "type": "boolean"
+          },
+          "price": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "publicUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "PaymentSubmission": {
+        "type": "object",
+        "required": [
+          "id",
+          "registrationId",
+          "registrationCode",
+          "participantName",
+          "status",
+          "isResubmission",
+          "expectedAmount",
+          "submittedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "registrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "registrationCode": {
+            "type": "string",
+            "example": "EW-7F3K2"
+          },
+          "participantName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_observation",
+              "approved",
+              "rejected"
+            ]
+          },
+          "isResubmission": {
+            "type": "boolean"
+          },
+          "expectedAmount": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "isOpenAmountQr": {
+            "type": "boolean"
+          },
+          "voucherUrl": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "InPersonRegistration": {
+        "type": "object",
+        "required": [
+          "answers"
+        ],
+        "properties": {
+          "answers": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Answers keyed by form field key; must include the email."
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "qr",
+              "cash"
+            ],
+            "description": "Omitted for free events."
+          },
+          "cashReceived": {
+            "$ref": "#/components/schemas/Money"
+          }
+        }
+      },
+      "RegistrationReceipt": {
+        "type": "object",
+        "required": [
+          "registrationId",
+          "code",
+          "status"
+        ],
+        "properties": {
+          "registrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "example": "EW-7F3K2"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_observation",
+              "approved",
+              "rejected",
+              "confirmed"
+            ]
+          },
+          "emailHasOtherRegistrations": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ExchangeToken": {
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Personal-link token from the email (FR-05.1)."
+          }
+        }
+      },
+      "ParticipantSession": {
+        "type": "object",
+        "required": [
+          "accessToken",
+          "expiresAt"
+        ],
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ParticipantRegistration": {
+        "type": "object",
+        "required": [
+          "registrationId",
+          "code",
+          "status",
+          "eventTitle",
+          "eventStartsAt",
+          "timeZone",
+          "answers",
+          "submissions"
+        ],
+        "properties": {
+          "registrationId": {
             "type": "string",
             "format": "uuid"
           },
@@ -325,76 +1285,65 @@
           },
           "status": {
             "type": "string",
-            "enum": ["pending", "in_observation", "approved", "rejected", "confirmed"]
+            "enum": [
+              "pending",
+              "in_observation",
+              "approved",
+              "rejected",
+              "confirmed"
+            ]
           },
-          "email": {
+          "eventTitle": {
             "type": "string"
           },
-          "createdAt": {
+          "eventStartsAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "organizerContact": {
+            "type": "string"
+          },
+          "answers": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "submissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentSubmission"
+            }
+          },
+          "canResubmit": {
+            "type": "boolean"
           }
         }
+      }
+    },
+    "responses": {
+      "Problem": {
+        "description": "RFC 9457 problem details",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetails"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "supabase": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       },
-      "PaymentSubmissionDto": {
-        "type": "object",
-        "required": ["id", "registrationId", "status", "attemptNo", "expectedAmount"],
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "registrationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "status": {
-            "type": "string",
-            "enum": ["pending", "in_observation", "approved", "rejected"]
-          },
-          "attemptNo": {
-            "type": "integer"
-          },
-          "expectedAmount": {
-            "type": "number"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "voucherUrl": {
-            "type": "string"
-          },
-          "submittedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "ExchangeTokenDto": {
-        "type": "object",
-        "required": ["token"],
-        "properties": {
-          "token": {
-            "type": "string"
-          }
-        }
-      },
-      "ParticipantSessionDto": {
-        "type": "object",
-        "required": ["token", "registrationId", "expiresAt"],
-        "properties": {
-          "token": {
-            "type": "string"
-          },
-          "registrationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "expiresAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
+      "participant": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }

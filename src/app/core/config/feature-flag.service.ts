@@ -1,4 +1,5 @@
 import { Injectable, computed, inject } from '@angular/core';
+import { FeatureFlag } from './config.model';
 import { ConfigService } from './config.service';
 
 @Injectable({
@@ -9,7 +10,8 @@ export class FeatureFlagService {
 
   readonly features = computed(() => this.#configService.config().features);
 
-  isEnabled(flag: string): boolean {
+  /** Typed on purpose: a misspelled flag is a compile error, not a silent `false`. */
+  isEnabled(flag: FeatureFlag): boolean {
     return this.features()[flag] ?? false;
   }
 }

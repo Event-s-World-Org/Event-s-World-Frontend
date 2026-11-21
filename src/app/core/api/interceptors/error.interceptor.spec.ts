@@ -3,27 +3,26 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { DEFAULT_ERROR_MESSAGE, ERROR_MESSAGES, ApiError } from '../../errors';
+import { ParticipantSessionService } from '../../auth';
+import { ApiError, DEFAULT_ERROR_MESSAGE, ERROR_MESSAGES } from '../../errors';
 import { errorInterceptor } from './error.interceptor';
+import { TEST_API_URL, provideTestConfig } from './test-support';
 
 describe('errorInterceptor', () => {
   let http: HttpClient;
   let httpMock: HttpTestingController;
-  let routerMock: { navigate: ReturnType<typeof vi.fn>; url: string };
+  let router: { navigate: ReturnType<typeof vi.fn>; url: string };
 
   beforeEach(() => {
-    routerMock = {
-      navigate: vi.fn(),
-      url: '/panel/eventos/456',
-    };
+    router = { navigate: vi.fn(), url: '/panel/eventos/456' };
 
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(withInterceptors([errorInterceptor])),
         provideHttpClientTesting(),
+        provideTestConfig(),
         { provide: PLATFORM_ID, useValue: 'browser' },
-        { provide: Router, useValue: routerMock },
+        { provide: Router, useValue: router },
       ],
     });
 
@@ -31,71 +30,63 @@ describe('errorInterceptor', () => {
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => {
-    httpMock.verify();
-  });
+  afterEach(() => httpMock.verify());
 
-  it('should redirect to /login with returnUrl on 401 Unauthorized', () => {
-    let capturedError: unknown;
+  function fail(path: string, body: object | string, status: number): ApiError | undefined {
+    let captured: ApiError | undefined;
+    http.get(`${TEST_API_URL}${path}`).subscribe({ error: (error: ApiError) => (captured = error) });
+    httpMock.expectOne(`${TEST_API_URL}${path}`).flush(body, { status, statusText: 'Error' });
+    return captured;
+  }
 
-    http.get('/api/v1/protected').subscribe({
-      next: () => expect.unreachable('Should have failed'),
-      error: (err) => {
-        capturedError = err;
-      },
-    });
+  it('redirects a 401 to /login with the current page as returnUrl', () => {
+    fail('/api/v1/me/events', {}, 401);
 
-    const req = httpMock.expectOne('/api/v1/protected');
-    req.flush({ code: 'UNAUTHORIZED' }, { status: 401, statusText: 'Unauthorized' });
-
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/login'], {
+    expect(router.navigate).toHaveBeenCalledWith(['/login'], {
       queryParams: { returnUrl: '/panel/eventos/456' },
     });
-    expect(capturedError).toBeDefined();
   });
 
-  it('should redirect to /403 on 403 Forbidden', () => {
-    http.get('/api/v1/admin').subscribe({
-      error: () => undefined,
-    });
+  it('sends a participant 401 to link recovery and clears the participant session', () => {
+    const participant = TestBed.inject(ParticipantSessionService);
+    participant.setSession('expired-token');
 
-    const req = httpMock.expectOne('/api/v1/admin');
-    req.flush({ code: 'FORBIDDEN' }, { status: 403, statusText: 'Forbidden' });
+    fail('/api/v1/participant/registration', {}, 401);
 
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/403']);
+    expect(router.navigate).toHaveBeenCalledWith(['/mi-inscripcion/recuperar']);
+    expect(participant.getToken()).toBeNull();
   });
 
-  it('should translate known error code to Spanish message', () => {
-    let capturedError: ApiError | undefined;
+  it('redirects a 403 to the no-permission page', () => {
+    fail('/api/v1/admin/overview', {}, 403);
 
-    http.get('/api/v1/events/123').subscribe({
-      error: (err: ApiError) => {
-        capturedError = err;
-      },
-    });
+    expect(router.navigate).toHaveBeenCalledWith(['/403']);
+  });
 
-    const req = httpMock.expectOne('/api/v1/events/123');
-    req.flush(
-      { code: 'CAPACITY_EXCEEDED', detail: 'Sold out' },
-      { status: 400, statusText: 'Bad Request' },
+  it('translates a known backend code to its Spanish message', () => {
+    const error = fail(
+      '/api/v1/public/events/fiesta/registrations',
+      { code: 'registrations.capacity_full', detail: 'Capacity reached.' },
+      409,
     );
 
-    expect(capturedError?.userMessage).toBe(ERROR_MESSAGES['CAPACITY_EXCEEDED']);
-    expect(capturedError?.status).toBe(400);
+    expect(error?.userMessage).toBe(ERROR_MESSAGES['registrations.capacity_full']);
+    expect(error?.status).toBe(409);
   });
 
-  it('should fallback to default generic message on unknown error code', () => {
-    let capturedError: ApiError | undefined;
+  it('shows the generic Spanish message for an unknown code, never the technical detail', () => {
+    const error = fail('/api/v1/me', { code: 'unknown.code', detail: 'NullReferenceException' }, 400);
 
-    http.get('/api/v1/events/123').subscribe({
-      error: (err: ApiError) => {
-        capturedError = err;
-      },
-    });
+    expect(error?.userMessage).toBe(DEFAULT_ERROR_MESSAGE);
+    expect(error?.detail).toBe('NullReferenceException');
+  });
 
-    const req = httpMock.expectOne('/api/v1/events/123');
-    req.flush({ code: 'NON_EXISTENT_CODE' }, { status: 400, statusText: 'Bad Request' });
+  it('does not touch errors from other hosts', () => {
+    let captured: unknown;
+    http.get('https://other.example/x').subscribe({ error: (error) => (captured = error) });
+    httpMock.expectOne('https://other.example/x').flush({}, { status: 401, statusText: 'Error' });
 
-    expect(capturedError?.userMessage).toBe(DEFAULT_ERROR_MESSAGE);
+    expect(captured).not.toBeInstanceOf(ApiError);
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 });
